@@ -83,8 +83,10 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
 
             if (!parent || !obj[parent])
                 throw new Error("TemplateSchema._parseConcatenateField Invalid field");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (result as any)[parent] = this._parseConcatenateField(fields.join("."), obj[parent] as Record<string, unknown>);
         } else
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (result as any)[field] = obj[field];
 
         return result;
