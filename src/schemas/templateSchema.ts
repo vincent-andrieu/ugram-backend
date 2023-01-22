@@ -4,8 +4,8 @@ import TemplateObject from "@classes/templateObject";
 import { ObjectId } from "utils";
 
 export default abstract class TemplateSchema<T extends TemplateObject> {
-    private _model: mongoose.Model<mongoose.Model<T>>;
-    private _ctor: new (obj: T) => T = TemplateObject as new (obj: T) => T;
+    protected _model: mongoose.Model<mongoose.Model<T>>;
+    protected _ctor: new (obj: T) => T = TemplateObject as new (obj: T) => T;
 
     constructor(schema: mongoose.Schema) {
         this._model = mongoose.model<mongoose.Model<T>>("users", schema);
@@ -38,8 +38,8 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
             throw new Error("TemplateSchema.update(obj) Invalid ID");
         return this.updateById(obj._id, obj);
     }
-    public async updateById(id: ObjectId, obj: Omit<T, "_id">): Promise<T | never> {
-        const result = await this._model.findByIdAndUpdate(id, obj, { new: true }); // Select fields to update
+    public async updateById(id: ObjectId, obj: Omit<T, "_id">, fields = ""): Promise<T | never> {
+        const result = await this._model.findByIdAndUpdate(id, this._parseFieldsSelector(fields, obj), { new: true });
 
         if (!result)
             throw new Error("TemplateSchema.update(id, obj) Not found");
@@ -58,5 +58,35 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
             if (result.deletedCount !== 1)
                 throw new Error("TemplateSchema.delete(ObjectId) Not found");
         }
+    }
+
+    protected _parseFieldsSelector(fields: string, obj: Record<string, unknown>): Record<string, unknown> {
+        if (fields.length === 0)
+            return obj;
+        let result = {};
+
+        for (const field of fields.split(" "))
+            result = {
+                ...result,
+                ...this._parseConcatenateField(field, obj)
+            };
+
+        return result;
+    }
+
+    private _parseConcatenateField<Target extends Record<string, unknown>, Source extends Record<string, unknown>>(field: string, obj: Source): Target {
+        const result = {} as Target;
+
+        if (field.includes(".")) {
+            const fields = field.split(".");
+            const parent = fields.shift();
+
+            if (!parent || !obj[parent])
+                throw new Error("TemplateSchema._parseConcatenateField Invalid field");
+            (result as any)[parent] = this._parseConcatenateField(fields.join("."), obj[parent] as Record<string, unknown>);
+        } else
+            (result as any)[field] = obj[field];
+
+        return result;
     }
 }
