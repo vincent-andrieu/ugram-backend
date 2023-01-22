@@ -19,7 +19,71 @@
         "curly": ["error", "multi"],
         "comma-dangle": ["error", "never"],
         // "no-inner-declarations": "off",
-        "eol-last": ["error", "never"]
+        "eol-last": ["error", "never"],
+        "@typescript-eslint/naming-convention": [
+            "error",
+            {
+                "selector": "default",
+                "format": ["camelCase"]
+            },
+            {
+                "selector": "variable",
+                "format": ["camelCase", "UPPER_CASE"]
+            },
+            {
+                "selector": "typeLike",
+                "format": ["PascalCase"]
+            },
+            {
+                // To force _ for unused parameters
+                "selector": "parameter",
+                "format": null,
+                "modifiers": ["unused"],
+                "custom": {
+                    "regex": "^_",
+                    "match": true
+                }
+            },
+            {
+                "selector": "classProperty",
+                "modifiers": ["static"],
+                "format": ["camelCase", "PascalCase"]
+            },
+            {
+                "selector": "memberLike",
+                "modifiers": ["private"],
+                "format": ["camelCase"],
+                "leadingUnderscore": "require"
+            },
+            {
+                "selector": "memberLike",
+                "modifiers": ["protected"],
+                "format": ["camelCase"],
+                "leadingUnderscore": "require"
+            },
+            {
+                // This rule is only to allow Mongo _id field
+                "selector": ["property"],
+                "modifiers": ["public"],
+                "format": ["camelCase"],
+                "leadingUnderscore": "allow",
+                "filter": {
+                    "regex": "^_id$",
+                    "match": true
+                }
+            },
+            {
+                // This rule is only to allow Mongo _id field
+                "selector": ["property"],
+                "modifiers": ["public"],
+                "format": ["camelCase"],
+                "leadingUnderscore": "forbid",
+                "filter": {
+                    "regex": "(?!_id)",
+                    "match": true
+                }
+            }
+        ]
         // "@typescript-eslint/explicit-module-boundary-types": "off"
     }
 }
