@@ -7,7 +7,7 @@ export function loggerMiddleware(request: Request, _: Response, next: NextFuncti
 }
 
 export function errorLoggerMiddleware(error: Error, request: Request, _: Response, next: NextFunction) {
-    console.error(`[${request.method}]`, request.url, "=>", error);
+    console.error(`[ERROR | ${request.method}]`, request.url, "=>", error);
 
     next(error);
 }

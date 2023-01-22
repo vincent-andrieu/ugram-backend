@@ -2,7 +2,7 @@ import { Express } from "express";
 
 import User from "@classes/user";
 import UserSchema from "@schemas/userSchema";
-import TemplateRoutes from "./TemplateRoutes";
+import TemplateRoutes from "./templateRoutes";
 import { toObjectId, isObjectId } from "../utils";
 
 export default class UserRoutes extends TemplateRoutes {

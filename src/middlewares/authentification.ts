@@ -76,6 +76,8 @@ export default class AuthentificationMiddleware {
     }
 
     private _isWhitelisted(request: Request): boolean {
+        if (request.originalUrl === "/")
+            return true;
         return this._whitelistRoutes.some(route => request.originalUrl.startsWith(route));
     }
 

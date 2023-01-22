@@ -1,5 +1,6 @@
 import { Express, NextFunction, Request, RequestHandler, Response } from "express";
 import { RouteParameters } from "express-serve-static-core";
+import mongoose from "mongoose";
 
 export default class TemplateRoutes {
 
@@ -14,6 +15,12 @@ export default class TemplateRoutes {
     }
 
     private _wrapper<P, ResBody, ReqBody>(request: Request<P, ResBody, ReqBody>, response: Response<ResBody>, next: NextFunction, handler: RequestHandler<P, ResBody, ReqBody>): void {
+        if (mongoose.connection.readyState !== mongoose.ConnectionStates.connected) {
+            response.sendStatus(503);
+            console.log("Database not connected:", mongoose.connection.readyState);
+            return;
+        }
+
         try {
             handler(request, response, next);
         } catch (error) {
