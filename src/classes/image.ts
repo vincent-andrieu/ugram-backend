@@ -1,4 +1,4 @@
-import { isObjectId, ObjectId, toObjectId } from "utils";
+import { isObjectId, ObjectId, toObjectId } from "../utils";
 import TemplateObject from "./templateObject";
 
 export default class Image extends TemplateObject {

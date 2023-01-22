@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 import TemplateObject from "@classes/templateObject";
-import { ObjectId } from "utils";
+import { ObjectId } from "../utils";
 
 export default abstract class TemplateSchema<T extends TemplateObject> {
     protected _model: mongoose.Model<mongoose.Model<T>>;

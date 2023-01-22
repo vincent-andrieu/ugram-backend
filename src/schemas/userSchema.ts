@@ -2,7 +2,7 @@ import mongoose, { FilterQuery } from "mongoose";
 
 import User from "@classes/user";
 import TemplateSchema from "./templateSchema";
-import { ObjectId } from "utils";
+import { ObjectId } from "../utils";
 
 const userSchema = new mongoose.Schema({
     useName: { type: String },

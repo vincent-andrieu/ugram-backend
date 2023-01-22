@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { env } from "process";
 
-import { ObjectId, toObjectId } from "utils";
+import { ObjectId, toObjectId } from "../utils";
 
 export type RouteWhitelister = (route: string) => void;
 

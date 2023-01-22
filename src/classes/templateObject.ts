@@ -1,4 +1,4 @@
-import { isObjectId, ObjectId } from "utils";
+import { isObjectId, ObjectId } from "../utils";
 
 export default abstract class TemplateObject {
     public _id?: ObjectId;
