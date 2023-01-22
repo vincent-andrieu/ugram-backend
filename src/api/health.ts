@@ -1,9 +1,13 @@
 import { Express } from "express";
 
+import { RouteWhitelister } from "@middlewares/authentification";
+
 export default class HealthRoutes {
 
-    constructor(private _app: Express) {
+    constructor(private _app: Express, routeWhitelister: RouteWhitelister) {
         this._init();
+
+        routeWhitelister("/");
     }
 
     private _init() {

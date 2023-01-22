@@ -1,16 +1,28 @@
 import "module-alias/register.js";
-import HealthRoutes from "@api/health";
+import dotenv from "dotenv";
+
 import initExpress from "./init/express";
+import HealthRoutes from "@api/health";
+import UserRoutes from "@api/user";
+import { loggerMiddleware, errorLoggerMiddleware} from "@middlewares/logger";
+import AuthentificationMiddleware from "@middlewares/authentification";
+
+dotenv.config({ path: ".env.local" });
 
 async function main() {
     const app = await initExpress();
+    const authentificationMiddleware = new AuthentificationMiddleware();
 
-    app.use((req, res, next) => {
-        console.log(`[${req.method}]`, req.url);
-        next();
-    });
+    // Middlewares
+    app.use(loggerMiddleware);
+    app.use(authentificationMiddleware.handler);
 
-    new HealthRoutes(app);
+    // Routes
+    new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
+    new UserRoutes(app);
+
+    // Error middlewares
+    app.use(errorLoggerMiddleware);
 }
 
 main();
