@@ -4,7 +4,7 @@ import TemplateSchema from "./templateSchema";
 import Image from "@classes/image";
 
 const imageSchema = new mongoose.Schema<Image>({
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "images", required: true },
     description: { type: String, required: true },
     hashtags: [
         { type: String }
