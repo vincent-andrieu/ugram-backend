@@ -1,0 +1,22 @@
+name: Check linter
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  server:
+    runs-on: ubuntu-22.04
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Run
+      - name: Build
+        run: npm run ci
+
+      - name: Lint
+        run: npm run lint
