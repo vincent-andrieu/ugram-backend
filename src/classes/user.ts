@@ -8,6 +8,9 @@ export default class User extends TemplateObject {
     avatar?: string; // Base64 image
     phone?: string;
     registrationDate?: Date;
+    auth?: {
+        password?: string;
+    };
 
     constructor(user: User) {
         super(user);
@@ -19,6 +22,10 @@ export default class User extends TemplateObject {
         this.avatar = user.avatar;
         this.phone = user.phone;
         this.registrationDate = user.registrationDate;
+        if (user.auth) {
+            this.auth = {};
+            this.auth.password = user.auth.password;
+        }
 
         this._validation();
     }
@@ -38,6 +45,10 @@ export default class User extends TemplateObject {
             throw new Error("Invalid phone");
         if (this.registrationDate && (!(this.registrationDate instanceof Date) || this.registrationDate.getTime() > Date.now()))
             throw new Error("Invalid registrationDate");
+        if (this.auth)
+            if (this.auth.password && (typeof this.auth.password !== "string" || this.auth.password.length < 5))
+                throw new Error("Invalid password");
+
     }
 
 }

@@ -1,17 +1,20 @@
 import express, { Express } from "express";
 import cors from "cors";
 import { env } from "process";
+import passport from "passport";
 
 export default function initExpress(): Promise<Express> {
     const PORT = env.PORT ? Number(env.PORT) : undefined;
 
-    if (!PORT) 
+    if (!PORT)
         throw new Error("PORT environment variable not found");
     return new Promise((resolve) => {
         const app = express();
 
         app.use(express.json());
         // app.use(bodyParser.urlencoded({ extended: true }));
+        app.use(passport.initialize());
+        app.use(passport.session());
 
         app.use(cors());
         app.use(function (_, result, next) {

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 export function loggerMiddleware(request: Request, _: Response, next: NextFunction) {
-    console.log(`[${request.method}]`, request.url);
+    console.log(`[\x1b[33m${request.method}\x1b[0m]`, "\x1b[32m" + request.url + "\x1b[0m");
 
     next();
 }

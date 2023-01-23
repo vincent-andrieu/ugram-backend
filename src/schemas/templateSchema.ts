@@ -33,6 +33,20 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
         }
     }
 
+    public async exist(id: Array<ObjectId>): Promise<boolean>;
+    public async exist(id: ObjectId): Promise<boolean>;
+    public async exist(id: Array<ObjectId> | ObjectId): Promise<boolean> {
+        if (Array.isArray(id)) {
+            const result = await this._model.countDocuments({ _id: { $in: id } });
+
+            return result === id.length;
+        }  else {
+            const result = await this._model.exists({ _id: id });
+
+            return !!result;
+        }
+    }
+
     public async update(obj: T) {
         if (!obj._id)
             throw new Error("TemplateSchema.update(obj) Invalid ID");

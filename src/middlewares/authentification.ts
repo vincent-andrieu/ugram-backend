@@ -1,46 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { env } from "process";
-
-import { ObjectId, toObjectId } from "../utils";
+import AuthService from "services/authService";
 
 export type RouteWhitelister = (route: string) => void;
-
-export interface JwtData {
-    userId: ObjectId;
-    token: string;
-}
-
-declare global {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
-    namespace Express {
-        interface User extends JwtPayload {
-            data: JwtData;
-        }
-    }
-}
-
-function formatJwtData(data: JwtData, token: string): JwtData {
-    return {
-        userId: toObjectId(data.userId),
-        token: token
-    };
-}
-
-function decodeJwt(token: string): Express.User {
-    const jwtSecret = env.JWT_SECRET;
-
-    if (!token || token.length === 0)
-        throw "Undefined JWT token";
-    if (!jwtSecret)
-        throw "Undefined JWT secret";
-    const decoded = jwt.verify(token, jwtSecret);
-
-    if (typeof decoded === "string" || !decoded.data)
-        throw "Fail to decode access token";
-    decoded.data = formatJwtData(decoded.data, token);
-    return decoded as Express.User;
-}
 
 export default class AuthentificationMiddleware {
     private _whitelistRoutes: Array<string> = [];
@@ -65,7 +26,7 @@ export default class AuthentificationMiddleware {
                 return response.status(403).send("A token is required for authentication");
 
             try {
-                request.user = decodeJwt(token);
+                request.user = new AuthService().decodeJwt(token);
             } catch (error) {
                 return response.status(500).send(error);
             }
