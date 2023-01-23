@@ -21,6 +21,9 @@ const successfullyAuthentificated: VerifyFunction = async (email: string, passwo
 
 passport.use("local", new Strategy(
     {
+        usernameField: "email",
+        passwordField: "password",
+        session: true,
         passReqToCallback: false
     },
     successfullyAuthentificated
