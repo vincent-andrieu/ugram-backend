@@ -29,12 +29,13 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
 
         done(null, { _id: user._id });
     } else {
+        const names = (profile._json.name as string).split(" ");
         const newUser = await userSchema.add(new User({
-            useName: profile.displayName || profile.username || profile._json.login,
-            firstName: profile.name?.givenName,
-            lastName: profile.name?.familyName,
+            useName: profile.displayName,
+            firstName: names[0] || profile.name?.givenName,
+            lastName: (names.length === 2 ? names[1] : names[3]) || profile.name?.familyName,
             email: profile._json.email || (profile.emails ? profile.emails[0].value : undefined),
-            avatar: profile.photos ? profile.photos[0].value : undefined,
+            avatar: profile._json.avatar_url || (profile.photos ? profile.photos[0].value : undefined),
             auth: {
                 sources: {
                     github: true
