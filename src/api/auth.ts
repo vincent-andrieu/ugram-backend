@@ -15,10 +15,21 @@ export default class AuthRoutes extends TemplateRoutes {
 
         this._init();
 
-        routeWhitelister("/auth");
+        routeWhitelister("/auth/local");
+        routeWhitelister("/auth/discord");
+        routeWhitelister("/auth/github");
+        routeWhitelister("/auth/google");
     }
 
     private _init() {
+
+        this._route("post", "/auth/logout", (req, _res, next) =>
+            req.logout((error) => {
+                if (error)
+                    return next(error);
+                next();
+            })
+        );
 
         this._route("get", "/auth/local", passport.authenticate("local", this._defaultAuthenticateOptions));
 
