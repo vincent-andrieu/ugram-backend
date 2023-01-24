@@ -14,6 +14,7 @@ export default class User extends TemplateObject {
         sources: {
             local?: boolean;
             discord?: boolean;
+            github?: boolean;
         };
     };
 
@@ -34,6 +35,7 @@ export default class User extends TemplateObject {
                 sources: {
                     local: user.auth.sources.local || false,
                     discord: user.auth.sources.discord || false,
+                    github: user.auth.sources.github || false
                 }
             };
             this.auth.password = user.auth.password;

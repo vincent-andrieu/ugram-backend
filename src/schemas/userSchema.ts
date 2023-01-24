@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
         source: {
             local: { type: Boolean, default: false, select: false },
             discord: { type: Boolean, default: false, select: false },
+            github: { type: Boolean, default: false, select: false }
         }
     }
 }, {
