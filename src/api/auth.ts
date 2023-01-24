@@ -23,11 +23,11 @@ export default class AuthRoutes extends TemplateRoutes {
 
     private _init() {
 
-        this._route("post", "/auth/logout", (req, _res, next) =>
+        this._route("post", "/auth/logout", (req, res, next) =>
             req.logout((error) => {
                 if (error)
                     return next(error);
-                next();
+                res.sendStatus(200);
             })
         );
 

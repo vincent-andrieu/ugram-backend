@@ -4,9 +4,11 @@ import User, { RawUser } from "@classes/user";
 import UserSchema from "@schemas/userSchema";
 import TemplateRoutes from "./templateRoutes";
 import { toObjectId, isObjectId } from "../utils";
+import ImageSchema from "@schemas/imageSchema";
 
 export default class UserRoutes extends TemplateRoutes {
     private _userSchema = new UserSchema();
+    private _imageSchema = new ImageSchema();
 
     constructor(app: Express) {
         super(app);
@@ -62,6 +64,17 @@ export default class UserRoutes extends TemplateRoutes {
             const result = await this._userSchema.updateById(req.user._id, user, fields);
 
             res.send(result);
+        });
+
+        this._route("delete", "/user", async (req, res) => {
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
+
+            await Promise.all([
+                this._imageSchema.deleteUserImages(req.user._id),
+                this._userSchema.delete(req.user._id)
+            ]);
+            res.sendStatus(200);
         });
 
     }
