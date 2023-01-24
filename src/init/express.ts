@@ -6,6 +6,7 @@ import session from "express-session";
 
 import MyUser from "@classes/user";
 
+import "@passport/setupPassport";
 import "@passport/localPassport";
 import "@passport/discordPassport";
 import "@passport/githubPassport";
@@ -35,14 +36,14 @@ export default function initExpress(): Promise<Express> {
 
         if (!passportSessionSecret)
             throw new Error("PASSPORT_SESSION_SECRET environment variable not found");
-        app.use(passport.initialize());
-        app.use(passport.session());
         app.use(session({
             secret: passportSessionSecret,
             resave: false,
             saveUninitialized: false,
             cookie: { secure: true }
         }));
+        app.use(passport.initialize());
+        app.use(passport.session());
 
         app.use(cors());
         app.use(function (_, result, next) {

@@ -9,7 +9,9 @@ export default class TemplateRoutes {
     constructor(protected _app: Express) {
         if (!env.CLIENT_URL)
             throw new Error("CLIENT_URL environment variable not found");
-        this._clientUrl = env.CLIENT_URL + (env.CLIENT_URL.endsWith("/") ? "" : "/");
+        this._clientUrl = env.CLIENT_URL;
+        if (this._clientUrl.endsWith("/"))
+            this._clientUrl = this._clientUrl.slice(0, -1);
     }
 
     protected _route<ReqBody = unknown, ResBody = unknown, P = RouteParameters<string>>(method: "get" | "post" | "put" | "delete", route: string, ...handlers: Array<RequestHandler<P, ResBody, ReqBody>>) {

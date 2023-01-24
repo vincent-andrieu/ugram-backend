@@ -5,7 +5,7 @@ import User from "@classes/user";
 import TemplateSchema from "./templateSchema";
 import { ObjectId } from "../utils";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<User>({
     useName: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     registrationDate: { type: Date, default: Date.now },
     auth: {
         password: { type: String, select: false },
-        source: {
+        sources: {
             local: { type: Boolean, default: false, select: false },
             discord: { type: Boolean, default: false, select: false },
             github: { type: Boolean, default: false, select: false },

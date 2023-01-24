@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Profile, Strategy } from "passport-github2";
 import { VerifyCallback, VerifyFunction } from "passport-oauth2";
-import { env } from "process";
+import { env, nextTick } from "process";
 
 import User from "@classes/user";
 import UserSchema from "@schemas/userSchema";
@@ -38,12 +38,14 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
     }
 };
 
-if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET)
-    throw new Error("Invalid github config");
+nextTick(() => {
+    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET)
+        throw new Error("Invalid github config");
 
-passport.use("github", new Strategy({
-    clientID: env.GITHUB_CLIENT_ID,
-    clientSecret: env.GITHUB_CLIENT_SECRET,
-    callbackURL: "/auth/github/callback",
-    scope: ["user:email"]
-}, checkAuthentification));
+    passport.use("github", new Strategy({
+        clientID: env.GITHUB_CLIENT_ID,
+        clientSecret: env.GITHUB_CLIENT_SECRET,
+        callbackURL: "/auth/github/callback",
+        scope: ["user:email"]
+    }, checkAuthentification));
+});
