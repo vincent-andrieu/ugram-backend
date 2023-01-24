@@ -5,7 +5,7 @@ import Image from "@classes/image";
 import { ObjectId } from "utils";
 
 const imageSchema = new mongoose.Schema<Image>({
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "images", required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     description: { type: String, required: true },
     hashtags: [
         { type: String }
@@ -22,7 +22,7 @@ const imageSchema = new mongoose.Schema<Image>({
 export default class ImageSchema extends TemplateSchema<Image> {
 
     constructor() {
-        super(imageSchema);
+        super("images", imageSchema);
     }
 
     public async deleteUserImages(userId: ObjectId): Promise<void> {

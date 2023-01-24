@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema<User>({
 export default class UserSchema extends TemplateSchema<User> {
 
     constructor() {
-        super(userSchema);
+        super("users", userSchema);
     }
 
     public async add(obj: User): Promise<User> {

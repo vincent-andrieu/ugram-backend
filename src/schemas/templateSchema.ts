@@ -7,8 +7,8 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
     protected _model: mongoose.Model<mongoose.Model<T>>;
     protected _ctor: new (obj: T) => T = TemplateObject as new (obj: T) => T;
 
-    constructor(schema: mongoose.Schema) {
-        this._model = mongoose.model<mongoose.Model<T>>("users", schema);
+    constructor(collectionName: string, schema: mongoose.Schema) {
+        this._model = mongoose.model<mongoose.Model<T>>(collectionName, schema);
     }
 
     public async add(obj: T): Promise<T> {
