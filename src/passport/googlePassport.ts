@@ -16,7 +16,15 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
             if (!user._id)
                 return done(new Error("Invalid user id"));
             if (!user.auth?.sources.google)
-                userSchema.updateById(user._id, { auth: { sources: { google: true } } }, "auth.sources.google");
+                userSchema.updateById(user._id, {
+                    auth: {
+                        ...user.auth,
+                        sources: {
+                            ...user.auth?.sources,
+                            google: true
+                        }
+                    }
+                });
 
             done(null, { _id: user._id });
         } else {

@@ -8,10 +8,10 @@ import { ObjectId } from "../utils";
 const userSchema = new mongoose.Schema<User>({
     useName: { type: String },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    lastName: { type: String },
     email: { type: String, unique: true, required: true },
     avatar: { type: String },
-    phone: { type: String, unique: true },
+    phone: { type: String },
     registrationDate: { type: Date, default: Date.now },
     auth: {
         password: { type: String, select: false },
@@ -35,12 +35,24 @@ export default class UserSchema extends TemplateSchema<User> {
 
     public async add(obj: User): Promise<User> {
         if (obj.auth?.password)
-            obj.auth.password = await bcrypt.hash(obj.auth.password, 10);
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, 10);
         return super.add(obj);
     }
 
-    public async findByEmail(email: string): Promise<User | null> {
-        const result = await this._model.findOne({ email }, "auth");
+    public async update(obj: User): Promise<User> {
+        if (obj.auth?.password)
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, 10);
+        return super.update(obj);
+    }
+
+    public async updateById(id: mongoose.Types.ObjectId, obj: Omit<User, "_id">, fields?: string): Promise<User> {
+        if (obj.auth?.password)
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, 10);
+        return super.updateById(id, obj, fields);
+    }
+
+    public async findByEmail(email: string, fields = "auth"): Promise<User | null> {
+        const result = await this._model.findOne({ email }, fields);
 
         return result ? new User(result.toObject()) : null;
     }

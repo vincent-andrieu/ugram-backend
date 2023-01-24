@@ -17,7 +17,15 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
         if (!user._id)
             return done(new Error("Invalid user id"));
         if (!user.auth?.sources.github)
-            userSchema.updateById(user._id, { auth: { sources: { github: true } } }, "auth.sources.github");
+            userSchema.updateById(user._id, {
+                auth: {
+                    ...user.auth,
+                    sources: {
+                        ...user.auth?.sources,
+                        github: true
+                    }
+                }
+            });
 
         done(null, { _id: user._id });
     } else {

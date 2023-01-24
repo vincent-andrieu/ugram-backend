@@ -18,18 +18,24 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
             if (!user._id)
                 return done(new Error("Invalid user id"));
             if (!user.auth?.sources.discord)
-                userSchema.updateById(user._id, { auth: { sources: { discord: true } } }, "auth.sources.discord");
+                userSchema.updateById(user._id, {
+                    auth: {
+                        ...user.auth,
+                        sources: {
+                            ...user.auth?.sources,
+                            discord: true
+                        }
+                    }
+                });
 
             done(null, { _id: user._id });
         } else {
             if (!profile.verified)
-                return done (new Error("Discord account not verified"));
+                return done(new Error("Discord account not verified"));
             const newUser = await userSchema.add(new User({
-                useName: profile.displayName || profile.username,
-                firstName: profile.name?.givenName,
-                lastName: profile.name?.familyName,
+                firstName: profile.username,
                 email: profile.email,
-                avatar: profile.avatar || undefined,
+                avatar: profile.id && profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}` : undefined,
                 auth: {
                     sources: {
                         discord: true
