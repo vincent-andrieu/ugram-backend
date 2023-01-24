@@ -25,7 +25,7 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
             useName: profile.displayName || profile.username || profile._json.login,
             firstName: profile.name?.givenName,
             lastName: profile.name?.familyName,
-            email: profile._json.email,
+            email: profile._json.email || (profile.emails ? profile.emails[0].value : undefined),
             avatar: profile.photos ? profile.photos[0].value : undefined,
             auth: {
                 sources: {
