@@ -1,24 +1,17 @@
-import UserSchema from "@schemas/userSchema";
-import AuthService from "@services/authService";
 import passport from "passport";
 
-passport.serializeUser<string>((user: Express.User, done) => { // user is a User class
-    try {
-        const token = new AuthService().signToken(user.data);
+import UserSchema from "@schemas/userSchema";
+import { ObjectId } from "../utils";
 
-        done(null, token);
-    }  catch (error) {
-        done(error);
-    }
+passport.serializeUser<ObjectId>((user: Express.User, done) => {
+    done(null, user._id);
 });
 
-passport.deserializeUser<string>(async (token, done) => {
+passport.deserializeUser<ObjectId>(async (userId, done) => {
     try {
-        const user = new AuthService().decodeJwt(token);
-        const userSchema = new UserSchema();
+        const user = await new UserSchema().get(userId);
 
-        if (await userSchema.exist(user.data.userId))
-            done(null, user);
+        done(null, user);
     } catch(error) {
         done(error);
     }

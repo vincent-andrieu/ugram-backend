@@ -35,6 +35,10 @@
                 "format": ["PascalCase"]
             },
             {
+                "selector": "enumMember",
+                "format": ["UPPER_CASE"]
+            },
+            {
                 // To force _ for unused parameters
                 "selector": "parameter",
                 "format": null,

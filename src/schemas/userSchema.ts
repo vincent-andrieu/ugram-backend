@@ -14,7 +14,10 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, unique: true },
     registrationDate: { type: Date, default: Date.now },
     auth: {
-        password: { type: String, select: false }
+        password: { type: String, select: false },
+        source: {
+            local: { type: Boolean, default: false, select: false },
+        }
     }
 }, {
     toObject: { virtuals: true },
@@ -34,7 +37,7 @@ export default class UserSchema extends TemplateSchema<User> {
     }
 
     public async findByEmail(email: string): Promise<User | null> {
-        const result = await this._model.findOne({ email }, { password: 1 });
+        const result = await this._model.findOne({ email }, "auth");
 
         return result ? new User(result.toObject()) : null;
     }

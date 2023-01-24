@@ -2,6 +2,19 @@ import express, { Express } from "express";
 import cors from "cors";
 import { env } from "process";
 import passport from "passport";
+import session from "express-session";
+
+import MyUser from "@classes/user";
+
+import "@passport/localPassport";
+
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Express {
+        // eslint-disable-next-line @typescript-eslint/no-empty-interface
+        interface User extends Omit<MyUser, "auth"> {}
+    }
+}
 
 export default function initExpress(): Promise<Express> {
     const PORT = env.PORT ? Number(env.PORT) : undefined;
@@ -13,8 +26,20 @@ export default function initExpress(): Promise<Express> {
 
         app.use(express.json());
         // app.use(bodyParser.urlencoded({ extended: true }));
+
+        // Passport middlewares
+        const passportSessionSecret = env.PASSPORT_SESSION_SECRET;
+
+        if (!passportSessionSecret)
+            throw new Error("PASSPORT_SESSION_SECRET environment variable not found");
         app.use(passport.initialize());
         app.use(passport.session());
+        app.use(session({
+            secret: passportSessionSecret,
+            resave: false,
+            saveUninitialized: false,
+            cookie: { secure: true }
+        }));
 
         app.use(cors());
         app.use(function (_, result, next) {
