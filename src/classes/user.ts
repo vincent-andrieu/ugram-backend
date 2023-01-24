@@ -1,6 +1,8 @@
 import { NonFunctionProperties } from "../utils";
 import TemplateObject from "./templateObject";
 
+export type RawUser = Omit<NonFunctionProperties<User>, "auth">;
+
 export default class User extends TemplateObject {
     useName?: string;
     firstName?: string;

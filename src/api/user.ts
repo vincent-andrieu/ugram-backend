@@ -1,6 +1,6 @@
 import { Express } from "express";
 
-import User from "@classes/user";
+import User, { RawUser } from "@classes/user";
 import UserSchema from "@schemas/userSchema";
 import TemplateRoutes from "./templateRoutes";
 import { toObjectId, isObjectId } from "../utils";
@@ -16,22 +16,18 @@ export default class UserRoutes extends TemplateRoutes {
 
     private _init() {
 
-        this._route("get", "/user", async (req, res) => {
-            if (!req.user)
-                throw new Error("Authenticated user not found");
-            const result = await this._userSchema.get(req.user.data.userId);
-
-            res.send(result);
+        this._route<never, RawUser>("get", "/user", async (req, res) => {
+            res.send(req.user);
         });
 
-        this._route("get", "/user/:id", async (req, res) => {
+        this._route<never, RawUser>("get", "/user/:id", async (req, res) => {
             const result = await this._userSchema.get(toObjectId(req.params.id));
 
             res.send(result);
         });
 
-        this._route("get", "/user/list", async (req, res) => {
-            if (!req.user)
+        this._route<never, Array<RawUser> | string>("get", "/user/list", async (req, res) => {
+            if (!req.user?._id)
                 throw new Error("Authenticated user not found");
             const page = Number(req.query.page) || 0;
             const size = Number(req.query.size) || 10;
@@ -43,14 +39,14 @@ export default class UserRoutes extends TemplateRoutes {
                 !Array.isArray(userFilter) || userFilter.some((userId) => !isObjectId(userId))
             )
                 return res.status(400).send("Invalid parameters");
-            userFilter.push(req.user.data.userId);
+            userFilter.push(req.user._id);
             const result = await this._userSchema.getPaginatedUsers(page, size, search, userFilter);
 
             res.send(result);
         });
 
-        this._route<User>("put", "/user", async (req, res) => {
-            if (!req.user)
+        this._route<RawUser>("put", "/user", async (req, res) => {
+            if (!req.user?._id)
                 throw new Error("Authenticated user not found");
             const user = new User(req.body);
             let fields = "";
@@ -63,7 +59,7 @@ export default class UserRoutes extends TemplateRoutes {
                 fields += " email";
             if (user.phone)
                 fields += " phone";
-            const result = await this._userSchema.updateById(req.user.data.userId, user, fields);
+            const result = await this._userSchema.updateById(req.user._id, user, fields);
 
             res.send(result);
         });
