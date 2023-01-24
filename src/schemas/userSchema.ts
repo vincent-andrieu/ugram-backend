@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
         password: { type: String, select: false },
         source: {
             local: { type: Boolean, default: false, select: false },
+            discord: { type: Boolean, default: false, select: false },
         }
     }
 }, {

@@ -7,6 +7,7 @@ import session from "express-session";
 import MyUser from "@classes/user";
 
 import "@passport/localPassport";
+import "@passport/discordPassport";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace

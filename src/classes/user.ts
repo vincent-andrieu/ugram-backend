@@ -13,6 +13,7 @@ export default class User extends TemplateObject {
         password?: string;
         sources: {
             local?: boolean;
+            discord?: boolean;
         };
     };
 
@@ -32,6 +33,7 @@ export default class User extends TemplateObject {
             this.auth = {
                 sources: {
                     local: user.auth.sources.local || false,
+                    discord: user.auth.sources.discord || false,
                 }
             };
             this.auth.password = user.auth.password;
