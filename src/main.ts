@@ -7,6 +7,7 @@ import HealthRoutes from "@api/health";
 import UserRoutes from "@api/user";
 import { loggerMiddleware, errorLoggerMiddleware} from "@middlewares/logger";
 import AuthentificationMiddleware from "@middlewares/authentification";
+import AuthRoutes from "@api/auth";
 
 dotenv.config({ path: ".env.local" });
 
@@ -22,6 +23,7 @@ async function main() {
 
     // Routes
     new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
+    new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
 
     // Error middlewares

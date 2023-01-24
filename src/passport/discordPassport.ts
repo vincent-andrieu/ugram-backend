@@ -40,12 +40,12 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
     }
 }
 
-if (!env.DISCORD_CLIENT_ID || !env.DISCORD_CLIENT_SECRET || !env.DISCORD_CALLBACK_URL)
+if (!env.DISCORD_CLIENT_ID || !env.DISCORD_CLIENT_SECRET)
     throw new Error("Invalid discord config");
 
 passport.use("discord", new Strategy({
     clientID: env.DISCORD_CLIENT_ID,
     clientSecret: env.DISCORD_CLIENT_SECRET,
-    scope: [Scope.IDENTIFY, Scope.EMAIL],
-    callbackURL: env.DISCORD_CALLBACK_URL
+    callbackURL: "/auth/discord/callback",
+    scope: [Scope.IDENTIFY, Scope.EMAIL]
 }, checkAuthentification));

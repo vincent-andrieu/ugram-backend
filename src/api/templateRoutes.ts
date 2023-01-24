@@ -1,10 +1,16 @@
 import { Express, NextFunction, Request, RequestHandler, Response } from "express";
 import { RouteParameters } from "express-serve-static-core";
 import mongoose from "mongoose";
+import { env } from "process";
 
 export default class TemplateRoutes {
+    protected readonly _clientUrl: string;
 
-    constructor(protected _app: Express) {}
+    constructor(protected _app: Express) {
+        if (!env.CLIENT_URL)
+            throw new Error("CLIENT_URL environment variable not found");
+        this._clientUrl = env.CLIENT_URL + (env.CLIENT_URL.endsWith("/") ? "" : "/");
+    }
 
     protected _route<ReqBody = unknown, ResBody = unknown, P = RouteParameters<string>>(method: "get" | "post" | "put" | "delete", route: string, ...handlers: Array<RequestHandler<P, ResBody, ReqBody>>) {
         return this._app[method](route, handlers

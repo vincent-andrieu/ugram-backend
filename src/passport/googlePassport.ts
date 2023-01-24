@@ -38,12 +38,12 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
     }
 }
 
-if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_CALLBACK_URL)
+if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET)
     throw new Error("Invalid google config");
 
 passport.use("google", new Strategy({
     clientID: env.GOOGLE_CLIENT_ID,
     clientSecret: env.GOOGLE_CLIENT_SECRET,
-    callbackURL: env.GOOGLE_CALLBACK_URL,
+    callbackURL: "/auth/google/callback",
     scope: ["email", "profile"]
 }, checkAuthentification));

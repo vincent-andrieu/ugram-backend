@@ -38,12 +38,12 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
     }
 };
 
-if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET || !env.GITHUB_CALLBACK_URL)
+if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET)
     throw new Error("Invalid github config");
 
 passport.use("github", new Strategy({
     clientID: env.GITHUB_CLIENT_ID,
     clientSecret: env.GITHUB_CLIENT_SECRET,
-    scope: ["user:email"],
-    callbackURL: env.GITHUB_CALLBACK_URL
+    callbackURL: "/auth/github/callback",
+    scope: ["user:email"]
 }, checkAuthentification));
