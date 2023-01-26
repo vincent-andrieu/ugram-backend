@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import passport from "passport";
 
 export type RouteWhitelister = (route: string) => void;
 
@@ -20,7 +19,9 @@ export default class AuthentificationMiddleware {
     }
 
     private _verification(request: Request, response: Response, next: NextFunction) {
-        return passport.authenticate("session")(request, response, next);
+        if (request.isAuthenticated())
+            return next();
+        response.sendStatus(401);
     }
 
     private _isWhitelisted(request: Request): boolean {

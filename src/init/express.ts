@@ -46,8 +46,8 @@ export default function initExpress(): Promise<Express> {
         app.use(passport.session());
 
         app.use(cors());
-        app.use(function (_, result, next) {
-            result.setHeader("Content-Type", "application/json");
+        app.use((_, response, next) => {
+            response.setHeader("Content-Type", "application/json");
             next();
         });
 
