@@ -1,13 +1,16 @@
-import "module-alias/register.js";
 import dotenv from "dotenv";
+import "module-alias/register.js";
+import { env } from "process";
+import swaggerUi from "swagger-ui-express";
 
-import initExpress from "./init/express";
-import initDatabase from "./init/database";
+import AuthRoutes from "@api/auth";
+import DocumentationRoutes from "@api/docs";
 import HealthRoutes from "@api/health";
 import UserRoutes from "@api/user";
-import { loggerMiddleware, errorLoggerMiddleware} from "@middlewares/logger";
 import AuthentificationMiddleware from "@middlewares/authentification";
-import AuthRoutes from "@api/auth";
+import { errorLoggerMiddleware, loggerMiddleware } from "@middlewares/logger";
+import initDatabase from "./init/database";
+import initExpress from "./init/express";
 
 dotenv.config({ path: ".env.local" });
 
@@ -21,8 +24,13 @@ async function main() {
     app.use(loggerMiddleware);
     app.use(authentificationMiddleware.handler.bind(authentificationMiddleware));
 
+    // Documentation
+    if (env.NODE_ENV !== "production")
+        app.use("/docs", swaggerUi.serve);
+
     // Routes
     new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
+    new DocumentationRoutes(app, authentificationMiddleware.whitelistRoute);
     new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
 
