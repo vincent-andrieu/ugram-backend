@@ -26,11 +26,10 @@ async function main() {
 
     // Documentation
     if (env.NODE_ENV !== "production")
-        app.use("/docs", swaggerUi.serve);
+        new DocumentationRoutes(app, authentificationMiddleware.whitelistRoute);
 
     // Routes
     new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
-    new DocumentationRoutes(app, authentificationMiddleware.whitelistRoute);
     new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
 

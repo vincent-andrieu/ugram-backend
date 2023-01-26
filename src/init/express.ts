@@ -29,7 +29,6 @@ export default function initExpress(): Promise<Express> {
         const app = express();
 
         app.use(express.json());
-        // app.use(bodyParser.urlencoded({ extended: true }));
 
         // Passport middlewares
         const passportSessionSecret = env.PASSPORT_SESSION_SECRET;
@@ -46,10 +45,6 @@ export default function initExpress(): Promise<Express> {
         app.use(passport.session());
 
         app.use(cors());
-        app.use((_, response, next) => {
-            response.setHeader("Content-Type", "application/json");
-            next();
-        });
 
         app.listen(PORT, () => {
             console.info(`App listening on port ${PORT} !`);

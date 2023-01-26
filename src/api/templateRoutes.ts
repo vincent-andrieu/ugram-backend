@@ -6,12 +6,21 @@ import { env } from "process";
 export default class TemplateRoutes {
     protected readonly _clientUrl: string;
 
-    constructor(protected _app: Express) {
+    constructor(protected _app: Express, private _defaultHeader: Record<string, string> = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        "Content-Type": "application/json"
+    }) {
         if (!env.CLIENT_URL)
             throw new Error("CLIENT_URL environment variable not found");
         this._clientUrl = env.CLIENT_URL;
         if (this._clientUrl.endsWith("/"))
             this._clientUrl = this._clientUrl.slice(0, -1);
+    }
+
+    protected _setHeader(response: Response, header: Record<string, string>) {
+        Object.entries(header).forEach(([key, value]) =>
+            response.setHeader(key, value)
+        );
     }
 
     protected _route<ReqBody = unknown, ResBody = unknown, P = RouteParameters<string>>(method: "get" | "post" | "put" | "delete", route: string, ...handlers: Array<RequestHandler<P, ResBody, ReqBody>>) {
@@ -28,6 +37,8 @@ export default class TemplateRoutes {
             console.log("Database not connected:", mongoose.connection.readyState);
             return;
         }
+
+        this._setHeader(response, this._defaultHeader);
 
         try {
             handler(request, response, next);
