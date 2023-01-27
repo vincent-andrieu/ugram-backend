@@ -7,14 +7,14 @@ import UserSchema from "@schemas/userSchema";
 
 async function checkAuthentification(_accessToken: string, _refreshToken: string, profile: Profile, done: VerifyCallback) {
     if (!profile._json.email)
-        return done(new Error("Google email not found"));
+        return done("Google email not found");
     const userSchema = new UserSchema();
     const user = await userSchema.findByEmail(profile._json.email);
 
     try {
         if (user) {
             if (!user._id)
-                return done(new Error("Invalid user id"));
+                return done(null, undefined, { message: "Invalid user id" });
             if (!user.auth?.sources.google)
                 userSchema.updateById(user._id, {
                     auth: {
@@ -29,7 +29,7 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
             done(null, { _id: user._id });
         } else {
             if (!profile._json.email_verified || profile._json.email_verified === "false")
-                return done (new Error("Google account not verified"));
+                return done(null, undefined, { message: "Google account not verified" });
             const newUser = await userSchema.add(new User({
                 useName: profile.displayName,
                 firstName: profile.name?.givenName,

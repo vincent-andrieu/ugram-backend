@@ -17,7 +17,57 @@ export default class UserRoutes extends TemplateRoutes {
     }
 
     private _init() {
+        /**
+         * @swagger
+         * definitions:
+         *   User:
+         *     type: object
+         *     properties:
+         *       _id:
+         *         type: string
+         *         format: ObjectId
+         *         example: 63d2f127e7efe7d7c86eb35f
+         *       useName:
+         *         type: string
+         *       firstName:
+         *         type: string
+         *       lastName:
+         *         type: string
+         *       email:
+         *         type: string
+         *         format: email
+         *       avatar:
+         *         type: string
+         *         format: Base64 or URL
+         *       phone:
+         *         description: Phone number starting with +
+         *         type: string
+         *         format: phone
+         *       registrationDate:
+         *         description: Date of registration (JS Date)
+         *         type: string
+         *         format: date-time
+         */
 
+        /**
+         * @swagger
+         * /user:
+         *   get:
+         *     description: Get the authenticated user or a user by id
+         *     tags:
+         *       - User
+         *     parameters:
+         *       - name: id
+         *         description: User ID
+         *         type: string
+         *         in: path
+         *     responses:
+         *       200:
+         *         schema:
+         *           $ref: '#/definitions/User'
+         *       401:
+         *         description: Unauthorized
+         */
         this._route<never, RawUser>("get", "/user", async (req, res) => {
             res.send(req.user);
         });
@@ -28,6 +78,44 @@ export default class UserRoutes extends TemplateRoutes {
             res.send(result);
         });
 
+        /**
+         * @swagger
+         * /user/list:
+         *   get:
+         *     description: Get a list of users
+         *     tags:
+         *       - User
+         *     parameters:
+         *       - name: page
+         *         description: Page number. Default 0
+         *         type: number
+         *         in: query
+         *       - name: size
+         *         description: Page size. Default 10
+         *         type: number
+         *         in: query
+         *       - name: search
+         *         description: Search string to search a user by first name, last name, email or phone
+         *         type: string
+         *         in: query
+         *       - name: userFilter
+         *         description: Array of user IDs to exclude from the result
+         *         type: array
+         *         items:
+         *           type: string
+         *         in: query
+         *     responses:
+         *       200:
+         *         description: List of users
+         *         schema:
+         *           type: array
+         *           items:
+         *             $ref: '#/definitions/User'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
         this._route<never, Array<RawUser> | string>("get", "/user/list", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
@@ -47,9 +135,47 @@ export default class UserRoutes extends TemplateRoutes {
             res.send(result);
         });
 
+        /**
+         * @swagger
+         * /user:
+         *   put:
+         *     description: Update the authenticated user
+         *     tags:
+         *       - User
+         *     parameters:
+         *       - name: firstName
+         *         description: First name
+         *         type: string
+         *         in: body
+         *       - name: lastName
+         *         description: Last name
+         *         type: string
+         *         in: body
+         *       - name: email
+         *         description: Email
+         *         type: string
+         *         format: email
+         *         in: body
+         *       - name: phone
+         *         description: Phone number starting with +
+         *         type: string
+         *         format: phone
+         *         in: body
+         *     responses:
+         *       200:
+         *         description: Updated user
+         *         schema:
+         *           $ref: '#/definitions/User'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
         this._route<RawUser>("put", "/user", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
+            if (Object.keys(req.body).length === 0)
+                return res.status(400).send("Invalid parameters");
             const user = new User(req.body);
             let fields = "";
 
@@ -66,6 +192,19 @@ export default class UserRoutes extends TemplateRoutes {
             res.send(result);
         });
 
+        /**
+         * @swagger
+         * /user:
+         *   delete:
+         *     description: Delete the authenticated user
+         *     tags:
+         *       - User
+         *     responses:
+         *       200:
+         *         description: User deleted
+         *       401:
+         *         description: Unauthorized
+         */
         this._route("delete", "/user", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");

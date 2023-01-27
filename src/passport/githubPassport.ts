@@ -9,13 +9,13 @@ import UserSchema from "@schemas/userSchema";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention
 const checkAuthentification: VerifyFunction = async (_accessToken: string, _refreshToken: string, profile: Profile & { _json: any }, done: VerifyCallback) => {
     if (!profile._json.email)
-        return done(new Error("Github email not found"));
+        return done(null, undefined, { message: "Github email not found" });
     const userSchema = new UserSchema();
     const user = await userSchema.findByEmail(profile._json.email);
 
     if (user) {
         if (!user._id)
-            return done(new Error("Invalid user id"));
+            return done(null, undefined, { message: "Invalid user id" });
         if (!user.auth?.sources.github)
             userSchema.updateById(user._id, {
                 auth: {

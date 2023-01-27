@@ -11,11 +11,10 @@ const checkAuthentification: VerifyFunctionWithRequest = async (request: Request
     let user = await userSchema.findByEmail(email, "auth firstName lastName");
 
     try {
-        console.log(!(request.query.firstName || request.body.firstName), !(request.query.lastName || request.body.lastName));
         if (!((request.query.firstName || request.body.firstName) && (request.query.lastName || request.body.lastName))) {
             if (!user?._id || !user.auth?.password || !bcrypt.compareSync(password, user.auth.password))
-                return done(new Error("Invalid credentials"));
-        } else if (!user) 
+                return done(null, undefined, { message: "Invalid credentials" });
+        } else if (!user)
             user = await userSchema.add(new User({
                 firstName: request.body.firstName || request.query.firstName,
                 lastName: request.body.lastName || request.query.lastName,
@@ -28,7 +27,7 @@ const checkAuthentification: VerifyFunctionWithRequest = async (request: Request
                 }
             }));
         else
-            done(new Error("User already exists"));
+            done(null, undefined, { message: "User already exists" });
 
         done(null, { _id: user._id });
     } catch (error) {

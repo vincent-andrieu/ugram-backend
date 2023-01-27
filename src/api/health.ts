@@ -15,10 +15,35 @@ export default class HealthRoutes extends TemplateRoutes {
     }
 
     private _init() {
+        /**
+         * @swagger
+         * /:
+         *   get:
+         *     description: Home page
+         *     tags:
+         *       - Health
+         *     responses:
+         *       200:
+         *         description: Success
+         *         schema:
+         *           type: string
+         *           example: OK
+         */
         this._route<never, string>("get", "/", (_, res) => {
             res.status(200).send("OK");
         });
 
+        /**
+         * @swagger
+         * /health:
+         *   get:
+         *     description: Health check
+         *     tags:
+         *       - Health
+         *     responses:
+         *       200:
+         *         description: Success
+         */
         this._route<never, never>("get", "/health", (_, res) => {
             res.sendStatus(200);
         });

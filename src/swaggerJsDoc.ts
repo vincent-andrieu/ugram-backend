@@ -15,6 +15,6 @@ export default {
         ]
     },
     apis: [
-        "./api/*.ts"
+        "./src/api/*.ts"
     ]
 } as Options;

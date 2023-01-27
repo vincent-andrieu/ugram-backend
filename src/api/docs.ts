@@ -20,7 +20,18 @@ export default class DocumentationRoutes extends TemplateRoutes {
 
     private _init() {
 
-        this._route("get", "/docs", swaggerUi.setup(swaggerJsDoc(swaggerJSDocConfig), { explorer: true }));
+        /**
+         * @swagger
+         * /docs:
+         *   get:
+         *     description: Swagger documentation
+         *     tags:
+         *       - Documentation
+         *     responses:
+         *       200:
+         *         description: Successfully sent
+         */
+        this._route("get", "/docs", swaggerUi.setup(swaggerJsDoc(swaggerJSDocConfig)));
 
     }
 }

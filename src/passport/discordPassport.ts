@@ -16,7 +16,7 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
     try {
         if (user) {
             if (!user._id)
-                return done(new Error("Invalid user id"));
+                return done(null, undefined, { message: "Invalid user id" });
             if (!user.auth?.sources.discord)
                 userSchema.updateById(user._id, {
                     auth: {
@@ -31,7 +31,7 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
             done(null, { _id: user._id });
         } else {
             if (!profile.verified)
-                return done(new Error("Discord account not verified"));
+                return done(null, undefined, { message: "Discord account not verified" });
             const newUser = await userSchema.add(new User({
                 firstName: profile.username,
                 email: profile.email,
