@@ -39,7 +39,7 @@ export default function initExpress(): Promise<Express> {
             secret: passportSessionSecret,
             resave: false,
             saveUninitialized: false,
-            cookie: { secure: true }
+            cookie: { secure: false }
         }));
         app.use(passport.initialize());
         app.use(passport.session());
