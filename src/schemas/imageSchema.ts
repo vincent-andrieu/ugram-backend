@@ -22,7 +22,7 @@ const imageSchema = new mongoose.Schema<Image>({
 export default class ImageSchema extends TemplateSchema<Image> {
 
     constructor() {
-        super("images", imageSchema);
+        super(Image, "images", imageSchema);
     }
 
     public async deleteUserImages(userId: ObjectId): Promise<void> {

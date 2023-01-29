@@ -5,9 +5,8 @@ import { ObjectId } from "../utils";
 
 export default abstract class TemplateSchema<T extends TemplateObject> {
     protected _model: mongoose.Model<mongoose.Model<T>>;
-    protected _ctor: new (obj: T) => T = TemplateObject as new (obj: T) => T;
 
-    constructor(collectionName: string, schema: mongoose.Schema) {
+    constructor(protected _ctor: { new(model: T): T }, collectionName: string, schema: mongoose.Schema) {
         this._model = mongoose.model<mongoose.Model<T>>(collectionName, schema);
     }
 
