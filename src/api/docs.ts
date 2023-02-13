@@ -14,6 +14,7 @@ export default class DocumentationRoutes extends TemplateRoutes {
         this._init();
 
         routeWhitelister("/docs");
+        routeWhitelister("/swagger");
 
         app.use("/docs", swaggerUi.serve);
     }
