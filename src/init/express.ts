@@ -8,9 +8,9 @@ import MyUser from "@classes/user";
 
 import "@passport/setupPassport";
 import "@passport/localPassport";
-import "@passport/discordPassport";
-import "@passport/githubPassport";
-import "@passport/googlePassport";
+// import "@passport/discordPassport";
+// import "@passport/githubPassport";
+// import "@passport/googlePassport";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
