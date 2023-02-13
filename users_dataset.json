@@ -5,7 +5,7 @@
         "lastName": "Doe",
         "email": "john.doe@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5555",
+        "phone": "+15555555555",
         "registrationDate": "2022-01-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxte3SZ9q0UqgtvAEB0XGSI6vd6EfvIQLRO",
@@ -23,7 +23,7 @@
         "lastName": "Doe",
         "email": "jane.doe@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5556",
+        "phone": "+15555555556",
         "registrationDate": "2022-02-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteuzs5BWpg/72pzHhexWUIsElcDTAFh/.",
@@ -41,7 +41,7 @@
         "lastName": "Smith",
         "email": "jack.smith@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5557",
+        "phone": "+15555555557",
         "registrationDate": "2022-03-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtegGpHzdVRmCrCOq5SU3vijIrwO4IudIW",
@@ -59,7 +59,7 @@
         "lastName": "Smith",
         "email": "emily.smith@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5553",
+        "phone": "+15555555553",
         "registrationDate": "2022-08-24T13:22:33.947Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtecRH2Qq1NQJJJXKOp..UMdwqAKoZpgS.",
@@ -77,7 +77,7 @@
         "lastName": "Brown",
         "email": "michael.brown@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5559",
+        "phone": "+15555555559",
         "registrationDate": "2022-05-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteTB0eqpJhrqnGvyRu7SdztgzQmDn/1hm",
@@ -95,7 +95,7 @@
         "lastName": "Davis",
         "email": "jessica.davis@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5560",
+        "phone": "+15555555560",
         "registrationDate": "2022-06-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteyGXxlwx7E.w6aq3V3zYy4hyljQ5/3US",
@@ -113,7 +113,7 @@
         "lastName": "Johnson",
         "email": "william.johnson@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5561",
+        "phone": "+15555555561",
         "registrationDate": "2022-07-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteVU1p7mlO/pPWSPhrbjmBfrvAwahYW5G",
@@ -131,7 +131,7 @@
         "lastName": "Williams",
         "email": "ashley.williams@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5562",
+        "phone": "+15555555562",
         "registrationDate": "2022-08-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteYqIPOmr5eOfsYsf2ufVxETzZm7C3oNu",
@@ -149,7 +149,7 @@
         "lastName": "Jones",
         "email": "matthew.jones@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5563",
+        "phone": "+15555555563",
         "registrationDate": "2022-09-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxte/MR0E.uksbrfcpYd6ZOx5HLsrVfEwGO",
@@ -167,7 +167,7 @@
         "lastName": "Smith",
         "email": "daniel.smith@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5564",
+        "phone": "+15555555564",
         "registrationDate": "2022-10-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteCYXeRASojGLzbiBOBXn1SrhTHCimREO",
@@ -185,7 +185,7 @@
         "lastName": "Moore",
         "email": "david.moore@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5565",
+        "phone": "+15555555565",
         "registrationDate": "2022-11-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtecCgBfukdx0BFL9tvRGC0NAU8GRLSH5G",
@@ -203,7 +203,7 @@
         "lastName": "Taylor",
         "email": "richard.taylor@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5566",
+        "phone": "+15555555566",
         "registrationDate": "2022-12-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteGb3PsIGjl3X0TF2/i7UJWq8s1L9piQq",
@@ -221,7 +221,7 @@
         "lastName": "Wilson",
         "email": "william.wilson@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5567",
+        "phone": "+15555555567",
         "registrationDate": "2023-01-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtedtzeTGqzlwrQzyYoMlNizMeR7CNnTfK",
@@ -239,7 +239,7 @@
         "lastName": "White",
         "email": "charles.white@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5568",
+        "phone": "+15555555568",
         "registrationDate": "2023-01-15T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteZAYK0xESHrh4ztacIUHq8rXB980sQGu",
@@ -257,7 +257,7 @@
         "lastName": "Phillips",
         "email": "jane.phillips@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5569",
+        "phone": "+15555555569",
         "registrationDate": "2023-01-30T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtekculzLDFY6sv1E98e3YA7ezSBqw2.v.",
@@ -275,7 +275,7 @@
         "lastName": "Smith",
         "email": "william.smith@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5570",
+        "phone": "+15555555570",
         "registrationDate": "2023-02-01T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteq8XP0bnmGp35lHFd5qrK2nDz99A6Khm",
@@ -293,7 +293,7 @@
         "lastName": "Jones",
         "email": "andrew.jones@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5571",
+        "phone": "+15555555571",
         "registrationDate": "2023-02-03T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtekTNqsH8xptuH1s4Er2W85r39aCBRLhG",
@@ -311,7 +311,7 @@
         "lastName": "Brown",
         "email": "christopher.brown@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5572",
+        "phone": "+15555555572",
         "registrationDate": "2023-02-05T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteMvViZ30TNaaoMMwGpXe6z6iGR0mDRzi",
@@ -329,7 +329,7 @@
         "lastName": "Johnson",
         "email": "daniel.johnson@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5573",
+        "phone": "+15555555573",
         "registrationDate": "2023-02-07T12:00:00.000Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteWtYX4.Q9OFRwyt8aQk71nWntivYlssG",
@@ -347,7 +347,7 @@
         "lastName": "Johnson",
         "email": "olivia.johnson@example.com",
         "avatar": "https://i.pravatar.cc/300",
-        "phone": "+1 (555) 555-5554",
+        "phone": "+15555555554",
         "registrationDate": "2022-11-12T08:32:15.589Z",
         "auth": {
             "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteQXDGKiAdnEGPfzcrA1EUoGha04yeyJe",
