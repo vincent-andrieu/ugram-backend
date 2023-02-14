@@ -39,12 +39,15 @@ export default function initExpress(): Promise<Express> {
             secret: passportSessionSecret,
             resave: false,
             saveUninitialized: false,
-            cookie: { secure: false }
+            cookie: { secure: false, httpOnly: true }
         }));
         app.use(passport.initialize());
         app.use(passport.session());
 
-        app.use(cors());
+        app.use(cors({
+            origin: env.CLIENT_URL,
+            credentials: true
+        }));
 
         app.listen(PORT, () => {
             console.info(`App listening on port ${PORT} !`);
