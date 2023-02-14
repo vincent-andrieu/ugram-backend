@@ -7,6 +7,7 @@ export default class Image extends TemplateObject {
     hashtags?: Array<string>;
     tags?: Array<ObjectId>;
     createdAt?: Date;
+    url?: string;
 
     constructor(image: Image) {
         super(image);
@@ -19,6 +20,7 @@ export default class Image extends TemplateObject {
         if (Array.isArray(this.tags))
             this.tags = this.tags.map(tag => toObjectId(tag));
         this.createdAt = image.createdAt || new Date();
+        this.url = image.url;
 
         this._validation();
     }
@@ -34,5 +36,7 @@ export default class Image extends TemplateObject {
             throw new Error("Invalid tags");
         if (this.createdAt && (!(this.createdAt instanceof Date) || this.createdAt.getTime() > Date.now()))
             throw new Error("Invalid createdAt");
+        if (this.url && typeof this.url !== "string")
+            throw new Error("Invalid url");
     }
 }
