@@ -73,9 +73,13 @@ export default class UserRoutes extends TemplateRoutes {
         });
 
         this._route<never, RawUser>("get", "/user/:id", async (req, res) => {
-            const result = await this._userSchema.get(toObjectId(req.params.id));
+            try {
+                const result = await this._userSchema.get(toObjectId(req.params.id));
 
-            res.send(result);
+                res.send(result);
+            } catch (error) {
+                res.sendStatus(404);
+            }
         });
 
         /**
