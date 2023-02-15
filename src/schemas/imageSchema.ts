@@ -1,7 +1,7 @@
 import TemplateSchema from "./templateSchema";
 import mongoose, { FilterQuery } from "mongoose";
 import Image from "@classes/image";
-import { ObjectId } from "utils";
+import { ObjectId } from "../utils";
 
 const imageSchema = new mongoose.Schema<Image>(
   {
@@ -41,9 +41,13 @@ export default class ImageSchema extends TemplateSchema<Image> {
     const images = await this._model.find({ author: userId }, undefined, {
       skip: page * size,
       limit: size,
-    });
+    }).sort({ createdAt: -1 });
 
     return images.map((image) => new Image(image.toObject()));
+  }
+
+  public async getImageById(imageId: ObjectId): Promise<Image | null> {
+    return this._model.findById(imageId);
   }
 
   public async getPaginatedImages(
@@ -66,8 +70,33 @@ export default class ImageSchema extends TemplateSchema<Image> {
     const images = await this._model.find(query, undefined, {
       skip: page * size,
       limit: size,
-    });
+    }).sort({ createdAt: -1 });
 
     return images.map((image) => new Image(image.toObject()));
+  }
+
+  public async uploadPost(
+    userId: ObjectId,
+    url: string,
+    description: string,
+    tags: ObjectId[],
+    hashtags: Array<string>
+  ): Promise<Image> {
+    const image = new Image({
+      author: userId,
+      url,
+      description,
+      tags,
+      hashtags,
+    } as Image);
+
+    return this.add(image);
+  }
+
+  public async deletePost(imageId: ObjectId, userId: ObjectId): Promise<void> {
+    await this._model.findOneAndDelete({
+      _id: imageId,
+      author: userId,
+    });
   }
 }
