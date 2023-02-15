@@ -11,27 +11,9 @@ export default class DocumentationRoutes extends TemplateRoutes {
     constructor(app: Express, routeWhitelister: RouteWhitelister) {
         super(app, {});
 
-        this._init();
-
         routeWhitelister("/docs");
 
-        app.use("/docs", swaggerUi.serve);
+        app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerJsDoc(swaggerJSDocConfig)));
     }
 
-    private _init() {
-
-        /**
-         * @swagger
-         * /docs:
-         *   get:
-         *     description: Swagger documentation
-         *     tags:
-         *       - Documentation
-         *     responses:
-         *       200:
-         *         description: Successfully sent
-         */
-        this._route("get", "/docs", swaggerUi.setup(swaggerJsDoc(swaggerJSDocConfig)));
-
-    }
 }

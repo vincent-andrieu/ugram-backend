@@ -8,9 +8,9 @@ import MyUser from "@classes/user";
 
 import "@passport/setupPassport";
 import "@passport/localPassport";
-// import "@passport/discordPassport";
-// import "@passport/githubPassport";
-// import "@passport/googlePassport";
+import "@passport/discordPassport";
+import "@passport/githubPassport";
+import "@passport/googlePassport";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -39,12 +39,15 @@ export default function initExpress(): Promise<Express> {
             secret: passportSessionSecret,
             resave: false,
             saveUninitialized: false,
-            cookie: { secure: false }
+            cookie: { secure: false, httpOnly: true }
         }));
         app.use(passport.initialize());
         app.use(passport.session());
 
-        app.use(cors());
+        app.use(cors({
+            origin: env.CLIENT_URL,
+            credentials: true
+        }));
 
         app.listen(PORT, () => {
             console.info(`App listening on port ${PORT} !`);

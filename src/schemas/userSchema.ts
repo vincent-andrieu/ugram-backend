@@ -72,6 +72,7 @@ export default class UserSchema extends TemplateSchema<User> {
         if (search)
             query.$and?.push({
                 $or: [
+                    { useName: { $regex: search, $options: "i" } },
                     { firstName: { $regex: search, $options: "i" } },
                     { lastName: { $regex: search, $options: "i" } },
                     { email: { $regex: search, $options: "i" } },

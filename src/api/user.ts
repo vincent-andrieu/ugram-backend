@@ -73,9 +73,13 @@ export default class UserRoutes extends TemplateRoutes {
         });
 
         this._route<never, RawUser>("get", "/user/:id", async (req, res) => {
-            const result = await this._userSchema.get(toObjectId(req.params.id));
+            try {
+                const result = await this._userSchema.get(toObjectId(req.params.id));
 
-            res.send(result);
+                res.send(result);
+            } catch (error) {
+                res.sendStatus(404);
+            }
         });
 
         /**
@@ -95,7 +99,7 @@ export default class UserRoutes extends TemplateRoutes {
          *         type: number
          *         in: query
          *       - name: search
-         *         description: Search string to search a user by first name, last name, email or phone
+         *         description: Search string to search a user by use name, first name, last name, email or phone
          *         type: string
          *         in: query
          *       - name: userFilter
