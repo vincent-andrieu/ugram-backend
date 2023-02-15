@@ -92,12 +92,9 @@ export default class ImageRoutes extends TemplateRoutes {
      *         description: Unauthorized
      */
         this._route<never, Image>("get", "/image/:id", async (req, res) => {
-            const image = await this._imageSchema.getImageById(
+            const image = await this._imageSchema.get(
                 toObjectId(req.params.id)
             );
-
-            if (!image)
-                throw new Error("Image not found");
 
             res.send(image);
         });
@@ -223,10 +220,7 @@ export default class ImageRoutes extends TemplateRoutes {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
 
-
-            const id = toObjectId(req.params.id);
-
-            await this._imageSchema.deletePost(id, req.user._id);
+            await this._imageSchema.deletePost(toObjectId(req.params.id), req.user._id);
 
             res.status(200);
         });

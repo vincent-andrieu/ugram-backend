@@ -46,10 +46,6 @@ export default class ImageSchema extends TemplateSchema<Image> {
         return images.map((image) => new Image(image.toObject()));
     }
 
-    public async getImageById(imageId: ObjectId): Promise<Image | null> {
-        return this._model.findById(imageId);
-    }
-
     public async getPaginatedImages(
         page: number,
         size: number,
