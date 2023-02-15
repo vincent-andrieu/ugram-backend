@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import "module-alias/register.js";
 import { env } from "process";
-import swaggerUi from "swagger-ui-express";
 
 import AuthRoutes from "@api/auth";
 import DocumentationRoutes from "@api/docs";
 import HealthRoutes from "@api/health";
+import ImageRoutes from "@api/image";
 import UserRoutes from "@api/user";
 import AuthentificationMiddleware from "@middlewares/authentification";
 import { errorLoggerMiddleware, loggerMiddleware } from "@middlewares/logger";
@@ -32,6 +32,7 @@ async function main() {
     new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
     new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
+    new ImageRoutes(app);
 
     // Error middlewares
     app.use(errorLoggerMiddleware);

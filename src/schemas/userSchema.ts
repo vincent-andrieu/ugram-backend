@@ -84,4 +84,8 @@ export default class UserSchema extends TemplateSchema<User> {
         return users.map((user) => new User(user.toObject()));
     }
 
+    public async updateAvatar(userId: ObjectId, avatar: string): Promise<void> {
+        await this._model.findByIdAndUpdate(userId, { avatar });
+    }
+
 }
