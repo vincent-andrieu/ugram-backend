@@ -87,10 +87,4 @@ export default class UserSchema extends TemplateSchema<User> {
         await this._model.findByIdAndUpdate(userId, { avatar });
     }
 
-    public async getUsersByIds(ids: ObjectId[]): Promise<User[]> {
-        const users = await this._model.find({ _id: { $in: ids } });
-
-        return users.map((user) => new User(user.toObject()));
-    }
-
 }
