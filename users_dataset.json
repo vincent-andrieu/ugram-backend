@@ -1,0 +1,56 @@
+[
+    {
+        "useName": "user1",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com",
+        "avatar": "https://i.pravatar.cc/300?img=1",
+        "phone": "+15555555555",
+        "registrationDate": "2022-01-01T12:00:00.000Z",
+        "auth": {
+            "password": "$2a$10$MxscRjQFJCCfsAmhSxUxte3SZ9q0UqgtvAEB0XGSI6vd6EfvIQLRO",
+            "sources": {
+                "local": true,
+                "discord": false,
+                "github": false,
+                "google": false
+            }
+        }
+    },
+    {
+        "useName": "user2",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane.doe@example.com",
+        "avatar": "https://i.pravatar.cc/300?img=5",
+        "phone": "+15555555556",
+        "registrationDate": "2022-02-01T12:00:00.000Z",
+        "auth": {
+            "password": "$2a$10$MxscRjQFJCCfsAmhSxUxteuzs5BWpg/72pzHhexWUIsElcDTAFh/.",
+            "sources": {
+                "local": true,
+                "discord": false,
+                "github": false,
+                "google": false
+            }
+        }
+    },
+    {
+        "useName": "user3",
+        "firstName": "Jack",
+        "lastName": "Smith",
+        "email": "jack.smith@example.com",
+        "avatar": "https://i.pravatar.cc/300?img=6",
+        "phone": "+15555555557",
+        "registrationDate": "2022-03-01T12:00:00.000Z",
+        "auth": {
+            "password": "$2a$10$MxscRjQFJCCfsAmhSxUxtegGpHzdVRmCrCOq5SU3vijIrwO4IudIW",
+            "sources": {
+                "local": true,
+                "discord": false,
+                "github": false,
+                "google": false
+            }
+        }
+    }
+]

@@ -1,0 +1,5 @@
+FROM mongo:6
+
+COPY users_dataset.json /app/users.json
+
+CMD mongoimport --uri "mongodb://$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@$MONGO_HOST:$MONGO_PORT/$MONGO_INITDB_DATABASE?authSource=admin" --db $MONGO_INITDB_DATABASE --collection users --drop --type json --file /app/users.json --jsonArray
