@@ -19,55 +19,32 @@ export default class ImageRoutes extends TemplateRoutes {
     }
 
     private _init() {
-    /**
-     * @swagger
-     * definitions:
-     *   User:
-     *     type: object
-     *     properties:
-     *       _id:
-     *         type: string
-     *         format: ObjectId
-     *         example: 63d2f127e7efe7d7c86eb35f
-     *       useName:
-     *         type: string
-     *       firstName:
-     *         type: string
-     *       lastName:
-     *         type: string
-     *       email:
-     *         type: string
-     *         format: email
-     *       avatar:
-     *         type: string
-     *         format: Base64 or URL
-     *       phone:
-     *         description: Phone number starting with +
-     *         type: string
-     *         format: phone
-     *       registrationDate:
-     *         description: Date of registration (JS Date)
-     *         type: string
-     *         format: date-time
-     *   Image:
-     *     type: object
-     *     properties:
-     *       _id:
-     *         type: string
-     *         format: ObjectId
-     *         example: 63d2f127e7efe7d7c86eb35f
-     *       url:
-     *         type: string
-     *         format: URL
-     *       author:
-     *         $ref: '#/definitions/User'
-     *       description:
-     *         type: string
-     *       tags:
-     *         type: array
-     *       hashtags:
-     *         type: array
-     */
+        /**
+         * @swagger
+         * definitions:
+         *   Image:
+         *     type: object
+         *     properties:
+         *       _id:
+         *         type: string
+         *         format: ObjectId
+         *         example: 63d2f127e7efe7d7c86eb35f
+         *       url:
+         *         type: string
+         *         format: URL
+         *       author:
+         *         $ref: '#/definitions/User'
+         *       description:
+         *         type: string
+         *       tags:
+         *          type: array
+         *          items:
+         *            type: string 
+         *       hashtags:
+         *         type: array
+         *         items:
+         *           type: string
+         */
 
         /**
      * @swagger
@@ -115,7 +92,10 @@ export default class ImageRoutes extends TemplateRoutes {
      *       200:
      *         description: Image url
      *         schema:
-     *           $ref: '#/definitions/Image'
+     *           type: object
+     *           properties:
+     *             url:
+     *               type: string
      *       400:
      *         description: Invalid parameters
      *       401:
@@ -143,7 +123,6 @@ export default class ImageRoutes extends TemplateRoutes {
      *   post:
      *     description: Uploads an avatar image
      *     tags:
-     *       - User
      *       - Image
      *     parameters:
      *       - name: file
@@ -154,9 +133,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *       200:
      *         description: Image
      *         schema:
-     *           type: object
-     *           items:
-     *             $ref: '#/definitions/Image'
+     *           $ref: '#/definitions/Image'
      *       400:
      *         description: Invalid parameters
      *       401:
@@ -196,11 +173,10 @@ export default class ImageRoutes extends TemplateRoutes {
         /**
      * @swagger
      * /image/post/{id}:
-     *   post:
+     *   delete:
      *     description: Deletes a post image
      *     tags:
      *       - Image
-     *       - User
      *     parameters:
      *       - name: id
      *         description: Image ID
@@ -231,7 +207,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *   get:
      *     description: Get list of all images from all users
      *     tags:
-     *       - User
+     *       - Image
      *     parameters:
      *       - name: page
      *         description: Page number. Default 0
@@ -300,7 +276,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *   get:
      *     description: Get list of all images from user
      *     tags:
-     *       - User
+     *       - Image
      *     parameters:
      *       - name: page
      *         description: Page number. Default 0
@@ -330,7 +306,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *         schema:
      *           type: array
      *           items:
-     *             $ref: '#/definitions/User'
+     *             $ref: '#/definitions/Image'
      *       400:
      *         description: Invalid parameters
      *       401:
