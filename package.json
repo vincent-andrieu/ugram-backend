@@ -9,7 +9,8 @@
         "start:force": "node -r dotenv/config ./build/main.js",
         "build": "tsc -p .",
         "dev": "npx nodemon -x npm run start -w src/ -e .ts",
-        "lint": "eslint src/"
+        "lint": "eslint src/",
+        "lint:fix": "eslint src/ --fix"
     },
     "author": "Équipe 9",
     "dependencies": {

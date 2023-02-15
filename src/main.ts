@@ -1,17 +1,16 @@
 import dotenv from "dotenv";
 import "module-alias/register.js";
 import { env } from "process";
-import swaggerUi from "swagger-ui-express";
 
 import AuthRoutes from "@api/auth";
 import DocumentationRoutes from "@api/docs";
 import HealthRoutes from "@api/health";
+import ImageRoutes from "@api/image";
 import UserRoutes from "@api/user";
 import AuthentificationMiddleware from "@middlewares/authentification";
 import { errorLoggerMiddleware, loggerMiddleware } from "@middlewares/logger";
 import initDatabase from "./init/database";
 import initExpress from "./init/express";
-import ImageRoutes from "@api/image";
 
 dotenv.config({ path: ".env.local" });
 

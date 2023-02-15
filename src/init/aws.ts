@@ -14,22 +14,22 @@ import multerS3 from "multer-s3";
 /*   return s3Client; */
 /* }; */
 
-const S3Config = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-  },
+const s3Config = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string
+    }
 });
 
 export const upload = multer({
-  limits: { fileSize: 10485760}, // 10MB
-  storage: multerS3({
-    s3: S3Config,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    bucket: "ugram-team9",
-    key: function(req, file, cb) {
-      cb(null, Date.now().toString());
-    },
-  }),
+    limits: { fileSize: 10485760}, // 10MB
+    storage: multerS3({
+        s3: s3Config,
+        contentType: multerS3.AUTO_CONTENT_TYPE,
+        bucket: "ugram-team9",
+        key: function(_req, _file, cb) {
+            cb(null, Date.now().toString());
+        }
+    })
 });

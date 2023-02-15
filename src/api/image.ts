@@ -1,28 +1,25 @@
 import { Express } from "express";
-
-import User from "@classes/user";
-import Image from "@classes/image";
-import UserSchema from "@schemas/userSchema";
-import TemplateRoutes from "./templateRoutes";
-import { toObjectId, isObjectId } from "../utils";
-import ImageSchema from "@schemas/imageSchema";
-import { upload } from "../init/aws";
 import mongoose from "mongoose";
-import { ObjectId } from "utils";
 import { RequestBody } from "swagger-jsdoc";
 
+import Image from "@classes/image";
+import ImageSchema from "@schemas/imageSchema";
+import UserSchema from "@schemas/userSchema";
+import { upload } from "../init/aws";
+import { isObjectId, toObjectId } from "../utils";
+import TemplateRoutes from "./templateRoutes";
+
 export default class ImageRoutes extends TemplateRoutes {
-  private _userSchema = new UserSchema();
-  private _imageSchema = new ImageSchema();
-  private _upload = upload;
+    private _userSchema = new UserSchema();
+    private _imageSchema = new ImageSchema();
 
-  constructor(app: Express) {
-    super(app);
+    constructor(app: Express) {
+        super(app);
 
-    this._init();
-  }
+        this._init();
+    }
 
-  private _init() {
+    private _init() {
     /**
      * @swagger
      * definitions:
@@ -73,7 +70,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *         type: array
      */
 
-    /**
+        /**
      * @swagger
      * /image/{id}:
      *   get:
@@ -95,24 +92,22 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, Image>("get", "/image/:id", async (req, res) => {
-      const user_id =
-        req.user?._id ||
-        new mongoose.Types.ObjectId("63ea693806a23d323fee1388");
-      if (!user_id) {
-        throw new Error("Authenticated user not found");
-      }
+        this._route<never, Image>("get", "/image/:id", async (req, res) => {
+            const userId = req.user?._id || new mongoose.Types.ObjectId("63ea693806a23d323fee1388");
+            if (!userId)
+                throw new Error("Authenticated user not found");
 
-      const image = await this._imageSchema.getImageById(
-        toObjectId(req.params.id)
-      );
 
-      if (!image) throw new Error("Image not found");
+            const image = await this._imageSchema.getImageById(
+                toObjectId(req.params.id)
+            );
 
-      res.send(image);
-    });
+            if (!image) throw new Error("Image not found");
 
-    /**
+            res.send(image);
+        });
+
+        /**
      * @swagger
      * /image/avatar:
      *   post:
@@ -134,26 +129,25 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, { url: string }>(
-      "post",
-      "/image/avatar",
-      upload.single("file"),
-      async (req, res) => {
-        const user_id =
-          req.user?._id;
-        if (!user_id) {
-          throw new Error("Authenticated user not found");
-        }
+        this._route<never, { url: string }>(
+            "post",
+            "/image/avatar",
+            upload.single("file"),
+            async (req, res) => {
+                const userId = req.user?._id;
+                if (!userId)
+                    throw new Error("Authenticated user not found");
 
-        const url = (req.file as Express.MulterS3.File).location;
 
-        await this._userSchema.updateAvatar(user_id, url);
+                const url = (req.file as Express.MulterS3.File).location;
 
-        res.send({ url });
-      }
-    );
+                await this._userSchema.updateAvatar(userId, url);
 
-    /**
+                res.send({ url });
+            }
+        );
+
+        /**
      * @swagger
      * /image/post:
      *   post:
@@ -178,42 +172,40 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, Image>(
-      "post",
-      "/image/post",
-      upload.single("file"),
-      async (req, res) => {
-        const user_id =
-          req.user?._id
-        if (!user_id) {
-          throw new Error("Authenticated user not found");
-        }
+        this._route<never, Image>(
+            "post",
+            "/image/post",
+            upload.single("file"),
+            async (req, res) => {
+                const userId = req.user?._id;
+                if (!userId)
+                    throw new Error("Authenticated user not found");
 
-        const description = (req.body as RequestBody).description || "";
-        let tags = (req.body as RequestBody).tags;
-        let hashtags = (req.body as RequestBody).hashtags || "";
-        hashtags = hashtags?.split(",");
-        tags = tags?.split(",");
 
-        const url = (req.file as Express.MulterS3.File).location;
+                const description = (req.body as RequestBody).description || "";
+                let tags = (req.body as RequestBody).tags;
+                let hashtags = (req.body as RequestBody).hashtags || "";
+                hashtags = hashtags?.split(",");
+                tags = tags?.split(",");
 
-        const taggedUsers: User[] = await this._userSchema.getUsersByIds(tags);
+                const url = (req.file as Express.MulterS3.File).location;
 
-        const taggedUsersIds: ObjectId[] = taggedUsers.map((user) => user._id!);
+                if (!(await this._userSchema.exist(tags)))
+                    throw "Tagged users not found";
 
-        const image = await this._imageSchema.uploadPost(
-          user_id,
-          url,
-          description,
-          taggedUsersIds,
-          hashtags
+                const image = await this._imageSchema.uploadPost(
+                    userId,
+                    url,
+                    description,
+                    tags,
+                    hashtags
+                );
+
+                res.send(image);
+            }
         );
 
-        res.send(image);
-      }
-    );
-
-    /**
+        /**
      * @swagger
      * /image/post/{id}:
      *   post:
@@ -236,20 +228,20 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, never>("delete", "/image/post/:id", async (req, res) => {
-      const user_id = req.user?._id || toObjectId("63ea693806a23d323fee1388");
-      if (!user_id) {
-        throw new Error("Authenticated user not found");
-      }
+        this._route<never, never>("delete", "/image/post/:id", async (req, res) => {
+            const userId = req.user?._id || toObjectId("63ea693806a23d323fee1388");
+            if (!userId)
+                throw new Error("Authenticated user not found");
 
-      const id = toObjectId(req.params.id);
 
-      await this._imageSchema.deletePost(id, user_id);
+            const id = toObjectId(req.params.id);
 
-      res.status(200);
-    });
+            await this._imageSchema.deletePost(id, userId);
 
-    /**
+            res.status(200);
+        });
+
+        /**
      * @swagger
      * /image/list:
      *   get:
@@ -287,43 +279,38 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, Array<Image> | string>(
-      "get",
-      "/image/list",
-      async (req, res) => {
-        //
-        if (!req.user?._id) throw new Error("Authenticated user not found");
-        const page = Number(req.query.page) || 0;
-        const size = Number(req.query.size) || 10;
-        const search = req.query.search;
-        const imageFilter =
+        this._route<never, Array<Image> | string>(
+            "get",
+            "/image/list",
+            async (req, res) => {
+                if (!req.user?._id)
+                    throw new Error("Authenticated user not found");
+                const page = Number(req.query.page) || 0;
+                const size = Number(req.query.size) || 10;
+                const search = req.query.search;
+                const imageFilter =
           (req.query.imageFilter as Array<string>)?.map((userId: string) =>
-            toObjectId(userId)
+              toObjectId(userId)
           ) || [];
 
-        if (
-          !page ||
-          !size ||
-          page < 0 ||
-          size < 0 ||
-          (search && typeof search !== "string") ||
-          !Array.isArray(imageFilter) ||
-          imageFilter.some((userId) => !isObjectId(userId))
-        )
-          return res.status(400).send("Invalid parameters");
-        imageFilter.push(req.user._id);
-        const result = await this._imageSchema.getPaginatedImages(
-          page,
-          size,
-          search,
-          imageFilter
+                if (!page || !size || page < 0 || size < 0 || (search && typeof search !== "string") ||
+                    !Array.isArray(imageFilter) ||
+                    imageFilter.some((userId) => !isObjectId(userId))
+                )
+                    return res.status(400).send("Invalid parameters");
+                imageFilter.push(req.user._id);
+                const result = await this._imageSchema.getPaginatedImages(
+                    page,
+                    size,
+                    search,
+                    imageFilter
+                );
+
+                res.send(result);
+            }
         );
 
-        res.send(result);
-      }
-    );
-
-    /**
+        /**
      * @swagger
      * /image/list/{id}:
      *   get:
@@ -365,22 +352,22 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-    this._route<never, Array<Image> | string>(
-      "get",
-      "/image/list/:id",
-      async (req, res) => {
-        if (!req.user?._id) throw new Error("Authenticated user not found");
-        const target = toObjectId(req.params.id);
-        const page = Number(req.query.page) || 0;
-        const size = Number(req.query.size) || 10;
-        const search = req.query.search;
-        const imageFilter =
+        this._route<never, Array<Image> | string>(
+            "get",
+            "/image/list/:id",
+            async (req, res) => {
+                if (!req.user?._id) throw new Error("Authenticated user not found");
+                const target = toObjectId(req.params.id);
+                const page = Number(req.query.page) || 0;
+                const size = Number(req.query.size) || 10;
+                const search = req.query.search;
+                const imageFilter =
           (req.query.imageFilter as Array<string>)?.map((userId: string) =>
-            toObjectId(userId)
+              toObjectId(userId)
           ) || [];
 
-        if (
-          !page ||
+                if (
+                    !page ||
           !size ||
           page < 0 ||
           size < 0 ||
@@ -388,17 +375,17 @@ export default class ImageRoutes extends TemplateRoutes {
           (search && typeof search !== "string") ||
           !Array.isArray(imageFilter) ||
           imageFilter.some((userId) => !isObjectId(userId))
-        )
-          return res.status(400).send("Invalid parameters");
-        imageFilter.push(req.user._id);
-        const result = await this._imageSchema.getPaginatedImagesByUser(
-          target,
-          page,
-          size
-        );
+                )
+                    return res.status(400).send("Invalid parameters");
+                imageFilter.push(req.user._id);
+                const result = await this._imageSchema.getPaginatedImagesByUser(
+                    target,
+                    page,
+                    size
+                );
 
-        res.send(result);
-      }
-    );
-  }
+                res.send(result);
+            }
+        );
+    }
 }
