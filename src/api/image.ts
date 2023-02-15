@@ -67,9 +67,9 @@ export default class ImageRoutes extends TemplateRoutes {
      *         $ref: '#/definitions/User'
      *       description:
      *         type: string
-     *      tags:
+     *       tags:
      *         type: array
-     *      hashtags:
+     *       hashtags:
      *         type: array
      */
 
