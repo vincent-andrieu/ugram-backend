@@ -39,7 +39,7 @@ export default class ImageRoutes extends TemplateRoutes {
          *       tags:
          *          type: array
          *          items:
-         *            type: string 
+         *            type: string
          *       hashtags:
          *         type: array
          *         items:
@@ -121,7 +121,7 @@ export default class ImageRoutes extends TemplateRoutes {
      * @swagger
      * /image/post:
      *   post:
-     *     description: Uploads an avatar image
+     *     description: Post an image by a user
      *     tags:
      *       - Image
      *     parameters:
