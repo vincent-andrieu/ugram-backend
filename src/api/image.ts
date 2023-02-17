@@ -5,7 +5,7 @@ import Image from "@classes/image";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
 import { upload } from "../init/aws";
-import { isObjectId, toObjectId } from "../utils";
+import { isObjectId, ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
@@ -148,10 +148,11 @@ export default class ImageRoutes extends TemplateRoutes {
                     throw new Error("Authenticated user not found");
 
                 const description = (req.body as RequestBody).description || "";
-                let tags = (req.body as RequestBody).tags;
-                let hashtags = (req.body as RequestBody).hashtags || "";
-                hashtags = hashtags?.split(",");
-                tags = tags?.split(",");
+
+                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
+                    .split(",")
+                    .map((tag: string) => toObjectId(tag));
+                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
 
                 const url = (req.file as Express.MulterS3.File).location;
 
@@ -212,10 +213,10 @@ export default class ImageRoutes extends TemplateRoutes {
                     throw new Error("Authenticated user not found");
 
                 const description = (req.body as RequestBody).description || "";
-                let tags = (req.body as RequestBody).tags;
-                let hashtags = (req.body as RequestBody).hashtags || "";
-                hashtags = hashtags?.split(",");
-                tags = tags?.split(",");
+                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
+                    .split(",")
+                    .map((tag: string) => toObjectId(tag));
+                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
                 const imageId = (req.body as RequestBody).imageId;
 
                 if (!(await this._userSchema.exist(tags)))
