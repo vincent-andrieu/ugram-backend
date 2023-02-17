@@ -5,7 +5,7 @@ import Image from "@classes/image";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
 import { upload } from "../init/aws";
-import { isObjectId, toObjectId } from "../utils";
+import { isObjectId, ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
@@ -148,10 +148,11 @@ export default class ImageRoutes extends TemplateRoutes {
                     throw new Error("Authenticated user not found");
 
                 const description = (req.body as RequestBody).description || "";
-                let tags = (req.body as RequestBody).tags;
-                let hashtags = (req.body as RequestBody).hashtags || "";
-                hashtags = hashtags?.split(",");
-                tags = tags?.split(",");
+
+                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
+                    .split(",")
+                    .map((tag: string) => toObjectId(tag));
+                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
 
                 const url = (req.file as Express.MulterS3.File).location;
 
@@ -166,6 +167,68 @@ export default class ImageRoutes extends TemplateRoutes {
                     hashtags
                 );
 
+                res.send(image);
+            }
+        );
+
+        /**
+     * @swagger
+     * /image/post:
+     *   put:
+     *     description: Update an image fields
+     *     tags:
+     *       - Image
+     *     parameters:
+     *       - name: imageId
+     *         description: Image ID
+     *         type: string
+     *         in: body
+     *       - name: description
+     *         description: Image description
+     *         type: string
+     *         in: body
+     *       - name: tags
+     *         description: Image tags
+     *         type: string
+     *         in: body
+     *       - name: hashtags
+     *         description: Image hashtags
+     *         type: string
+     *         in: body
+     *     responses:
+     *       200:
+     *         description: Image
+     *         schema:
+     *           $ref: '#/definitions/Image'
+     *       400:
+     *         description: Invalid parameters
+     *       401:
+     *         description: Unauthorized
+     */
+        this._route<never, Image>(
+            "put",
+            "/image/post",
+            async (req, res) => {
+                if (!req.user?._id)
+                    throw new Error("Authenticated user not found");
+
+                const description = (req.body as RequestBody).description || "";
+                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
+                    .split(",")
+                    .map((tag: string) => toObjectId(tag));
+                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
+                const imageId = (req.body as RequestBody).imageId;
+
+                if (!(await this._userSchema.exist(tags)))
+                    throw "Tagged users not found";
+
+                const image = await this._imageSchema.updatePost(
+                    imageId,
+                    req.user._id,
+                    description,
+                    tags,
+                    hashtags
+                );
                 res.send(image);
             }
         );

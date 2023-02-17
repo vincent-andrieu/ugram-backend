@@ -89,6 +89,30 @@ export default class ImageSchema extends TemplateSchema<Image> {
         return this.add(image);
     }
 
+    public async updatePost(
+        imageId: ObjectId,
+        userId: ObjectId,
+        description: string,
+        tags: ObjectId[],
+        hashtags: Array<string>
+    ): Promise<Image> {
+        const image = await this._model.findOneAndUpdate(
+            {
+                _id: imageId,
+                author: userId
+            },
+            {
+                description,
+                tags,
+                hashtags
+            }
+        );
+
+        if (!image) throw new Error("Image not found");
+
+        return new Image(image.toObject());
+    }
+
     public async deletePost(imageId: ObjectId, userId: ObjectId): Promise<void> {
         await this._model.findOneAndDelete({
             _id: imageId,
