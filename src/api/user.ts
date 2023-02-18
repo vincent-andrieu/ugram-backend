@@ -84,7 +84,7 @@ export default class UserRoutes extends TemplateRoutes {
 
         /**
          * @swagger
-         * /user/list:
+         * /users:
          *   get:
          *     description: Get a list of users
          *     tags:
@@ -120,7 +120,7 @@ export default class UserRoutes extends TemplateRoutes {
          *       401:
          *         description: Unauthorized
          */
-        this._route<never, Array<RawUser> | string>("get", "/user/list", async (req, res) => {
+        this._route<never, Array<RawUser> | string>("get", "/users", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
             const page = Number(req.query.page) || 0;
