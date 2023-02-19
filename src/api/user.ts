@@ -128,7 +128,8 @@ export default class UserRoutes extends TemplateRoutes {
             const search = req.query.search;
             const userFilter = (req.query.userFilter as Array<string>)?.map((userId: string) => toObjectId(userId)) || [];
 
-            if (!page || !size || page < 0 || size < 0 ||
+            console.log(page, !size, page < 0, size < 0, search && typeof search !== "string", !Array.isArray(userFilter), userFilter.some((userId) => !isObjectId(userId)));
+            if (Number.isNaN(page) || Number.isNaN(size) || page < 0 || size < 0 ||
                 (search && typeof search !== "string") ||
                 !Array.isArray(userFilter) || userFilter.some((userId) => !isObjectId(userId))
             )
