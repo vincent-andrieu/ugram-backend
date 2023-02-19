@@ -359,7 +359,7 @@ export default class ImageRoutes extends TemplateRoutes {
      */
         this._route<never, Array<Image> | string>(
             "get",
-            "/image/list/:id",
+            "/image/user/:id",
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
