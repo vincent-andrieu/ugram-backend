@@ -80,12 +80,11 @@ export default class ImageSchema extends TemplateSchema<Image> {
     ): Promise<Image> {
         const image = new Image({
             author: userId,
-            url,
             description,
-            tags,
-            hashtags
-        } as Image);
-
+            url,
+            tags: tags ?? [],
+            hashtags: hashtags ?? [],
+        })
         return this.add(image);
     }
 
