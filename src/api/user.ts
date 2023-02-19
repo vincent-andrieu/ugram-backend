@@ -183,6 +183,8 @@ export default class UserRoutes extends TemplateRoutes {
             const user = new User(req.body);
             let fields = "";
 
+            if (user.useName)
+                fields += " useName";
             if (user.firstName)
                 fields += " firstName";
             if (user.lastName)
