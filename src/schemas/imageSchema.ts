@@ -43,7 +43,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
     public async getPaginatedImages(
@@ -66,7 +66,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
     public async updatePost(
