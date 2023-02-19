@@ -59,7 +59,7 @@ export default class User extends TemplateObject {
             throw new Error("Invalid email");
         if (this.avatar && (typeof this.avatar !== "string" || (!RegExp(/^data:image\/(png|jpg|jpeg);base64,/).test(this.avatar) && !this.avatar.startsWith("https://"))))
             throw new Error("Invalid avatar");
-        if (this.phone && (typeof this.phone !== "string" || !RegExp(/^\+?[0-9]+$/).test(this.phone)))
+        if (this.phone && (typeof this.phone !== "string"))
             throw new Error("Invalid phone");
         if (this.registrationDate && (!(this.registrationDate instanceof Date) || this.registrationDate.getTime() > Date.now()))
             throw new Error("Invalid registrationDate");
