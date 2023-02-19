@@ -10,7 +10,7 @@ const imageSchema = new mongoose.Schema<Image>(
             ref: "users",
             required: true
         },
-        description: { type: String, required: true },
+        description: { type: String },
         url: { type: String, required: true },
         hashtags: [{ type: String }],
         tags: [{ type: String, ref: "users" }],

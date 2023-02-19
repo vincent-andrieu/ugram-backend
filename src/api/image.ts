@@ -151,7 +151,6 @@ export default class ImageRoutes extends TemplateRoutes {
                 const tags: string | null = (req.body as RequestBody)?.tags || null;
 
                 const checkedTags = tags?.split(",")?.map((tag) => toObjectId(tag));
-                console.log("tags");
                 const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
 
                 const url = (req.file as Express.MulterS3.File).location;
@@ -159,17 +158,16 @@ export default class ImageRoutes extends TemplateRoutes {
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
 
-
-                console.log("uploadPost");
-
-                const image = await this._imageSchema.add(new Image({
-                    author: req.user._id,
+                const imageSchema = new Image({
+                    author: toObjectId(req.user._id),
                     description,
                     url,
-                    tags: checkedTags || [],
-                    hashtags: hashtags
-                }));
-                console.log("after uploadPost");
+                    tags: checkedTags ?? [],
+                    hashtags: hashtags ?? [""]
+                });
+                const image = await this._imageSchema.add(
+                    imageSchema
+                );
 
                 res.send(image);
             }
