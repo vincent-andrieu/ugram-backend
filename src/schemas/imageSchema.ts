@@ -52,7 +52,6 @@ export default class ImageSchema extends TemplateSchema<Image> {
         search?: string
     ) {
         const query: FilterQuery<Image> = {};
-        console.log("ii");
         if (search)
             query.$and?.push({
                 $or: [

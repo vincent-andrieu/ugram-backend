@@ -157,7 +157,6 @@ export default class ImageRoutes extends TemplateRoutes {
                 if (checkedTags)
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
-
                 const imageSchema = new Image({
                     author: toObjectId(req.user._id),
                     description,
@@ -308,7 +307,6 @@ export default class ImageRoutes extends TemplateRoutes {
                 const size = Number(req.query.size) || 10;
                 const search = req.query.search || "";
 
-                console.log(page, size, search);
                 if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || (search && typeof search !== "string"))
                     return res.status(400).send("Invalid parameters");
                 const result = await this._imageSchema.getPaginatedImages(

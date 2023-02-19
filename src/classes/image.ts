@@ -26,7 +26,6 @@ export default class Image extends TemplateObject {
     }
 
     protected _validation() {
-        console.log("tags", this.tags?.some(tag => isObjectId(tag)));
         if (this.author && !isObjectId(this.author))
             throw "Invalid author";
         if (this.description && typeof this.description !== "string")
