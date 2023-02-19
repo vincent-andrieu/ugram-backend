@@ -71,23 +71,6 @@ export default class ImageSchema extends TemplateSchema<Image> {
         return images.map((image) => new Image(image.toObject()));
     }
 
-    public async uploadPost(
-        userId: ObjectId,
-        url: string,
-        description: string,
-        tags: ObjectId[],
-        hashtags: Array<string>
-    ): Promise<Image> {
-        const image = new Image({
-            author: userId,
-            description,
-            url,
-            tags: tags ?? [],
-            hashtags: hashtags ?? [],
-        })
-        return this.add(image);
-    }
-
     public async updatePost(
         imageId: ObjectId,
         userId: ObjectId,

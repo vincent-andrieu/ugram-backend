@@ -1,4 +1,4 @@
-import { isObjectId, ObjectId, toObjectId } from "../utils";
+import { isObjectId, NonFunctionProperties, ObjectId, toObjectId } from "../utils";
 import TemplateObject from "./templateObject";
 
 export default class Image extends TemplateObject {
@@ -9,7 +9,7 @@ export default class Image extends TemplateObject {
     createdAt?: Date;
     url?: string;
 
-    constructor(image: Image) {
+    constructor(image: NonFunctionProperties<Image>) {
         super(image);
 
         if (image.author)
