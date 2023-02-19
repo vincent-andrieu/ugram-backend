@@ -48,9 +48,9 @@ export default class TemplateRoutes {
         }
     }
 
-    private _errorHandler<P, ResBody, ReqBody, ReqQuery>(error: unknown, _req: Request<P, ResBody, ReqBody, ReqQuery>, _res: Response, next: NextFunction): void {
+    private _errorHandler<P, ResBody, ReqBody, ReqQuery>(error: unknown, _req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response, next: NextFunction): void {
         if (typeof error === "string")
-            next(new Error(error));
+            res.status(400).send(error);
         else if (error instanceof Error)
             next(error);
         else
