@@ -10,7 +10,7 @@ const imageSchema = new mongoose.Schema<Image>(
             ref: "users",
             required: true
         },
-        description: { type: String, required: true },
+        description: { type: String },
         url: { type: String, required: true },
         hashtags: [{ type: String }],
         tags: [{ type: String, ref: "users" }],
@@ -69,24 +69,6 @@ export default class ImageSchema extends TemplateSchema<Image> {
         }).sort({ createdAt: -1 });
 
         return images.map((image) => new Image(image.toObject()));
-    }
-
-    public async uploadPost(
-        userId: ObjectId,
-        url: string,
-        description: string,
-        tags: ObjectId[],
-        hashtags: Array<string>
-    ): Promise<Image> {
-        const image = new Image({
-            author: userId,
-            url,
-            description,
-            tags,
-            hashtags
-        } as Image);
-
-        return this.add(image);
     }
 
     public async updatePost(

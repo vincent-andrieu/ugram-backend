@@ -146,25 +146,27 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
+                const description = (req.body as RequestBody)?.description || "";
 
-                const description = (req.body as RequestBody).description || "";
+                const tags: string | null = (req.body as RequestBody)?.tags || null;
 
-                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
-                    .split(",")
-                    .map((tag: string) => toObjectId(tag));
+                const checkedTags = tags?.split(",")?.map((tag) => toObjectId(tag));
                 const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
 
                 const url = (req.file as Express.MulterS3.File).location;
+                if (checkedTags)
+                    if (!(await this._userSchema.exist(checkedTags)))
+                        throw "Tagged users not found";
 
-                if (!(await this._userSchema.exist(tags)))
-                    throw "Tagged users not found";
-
-                const image = await this._imageSchema.uploadPost(
-                    req.user._id,
-                    url,
+                const imageSchema = new Image({
+                    author: toObjectId(req.user._id),
                     description,
-                    tags,
-                    hashtags
+                    url,
+                    tags: checkedTags ?? [],
+                    hashtags: hashtags ?? [""]
+                });
+                const image = await this._imageSchema.add(
+                    imageSchema
                 );
 
                 res.send(image);
