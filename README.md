@@ -7,8 +7,8 @@ Pour le frontend nous utiliserons VueJs avec Typescript.
 Nos choix de technos backend sont NodeJS avec Typescript et Express pour notre framework. Celles-ci nous permettront de s'adapter plus facilement au frontend et ainsi permettre une meilleure productivité et maintenance de notre code.
 
 ## Base de données
-Nous utilisons MongoDB comme base de données pour stocker toutes les données de l'application. Son utilisation sera facilité grâce à Mongoose. Nous avons choisi une base de données NoSQL car nous estimons que les propriétés ACID ne sont pas primordiales pour l'application. De plus MongoDB nous permet de stocker des fichiers en BSON jusqu'à 16 Mo ce qui est largement suffisant pour des photos. Une évolution possible pourra être d'utiliser GridFS pour stocker des fichiers plus volumineux comme des vidéos par exemple.
-Enfin nous sommes tous formés avec MongoDB et nous n'auront pas besoins de se former sur une nouvelle technologie.
+Nous utilisons MongoDB comme base de données pour stocker toutes les données de l'application. Son utilisation sera facilité grâce à Mongoose. Nous avons choisi une base de données NoSQL car nous estimons que les propriétés ACID ne sont pas primordiales pour l'application.
+Les images seront elles stockées avec le service S3 d'AWS.
 
 ## CI/CD
 Les GitHub Actions pour permettrons de tester la compilation de notre projet.
@@ -16,10 +16,12 @@ Les GitHub Actions pour permettrons de tester la compilation de notre projet.
 ## Déploiement
 Nous utiliserons la méthode de déploiement proposée par le cours, soit AWS.
 
+
 # Instructions
 Ce repository contient seulement la partie backend du projet. C'est pourquoi il ne lance que le serveur et la base de données.
 
 ## Implémentations
+- L'application est lancée en mode production avec le docker compose.
 - L'**authentification** avec [passportjs](https://www.passportjs.org/) a été implémenté pour le premier livrable. Celle-ci fonctionne avec un email et un mot de passe ou par l'oauth2 via **Google**, **GitHub** ou **Discord**.
     - Les mots de passes stockés dans la base de données sont hachés avec [bcryptjs](https://www.npmjs.com/package/bcryptjs).
     - Le cookie utilisé pour l'authentification est celui de *passportjs* et il est vérifié par un middleware sur les routes protégées.
@@ -34,7 +36,16 @@ Ce repository contient seulement la partie backend du projet. C'est pourquoi il 
     - Nom
     - Mail
     - Numéro de téléphone
-
+- Une base de 3 utilisateurs sont ajoutés à l'initialisation de la base de données pour faciliter l'utilisation de l'application. Ils sont disponibles dans le fichier [`users_dataset.json`](./users_dataset.json) :
+    - `user1` :
+        - Mail : `john.doe@example.com`
+        - Mot de passe : `password1`
+    - `user2` :
+        - Mail : `jane.doe@example.com`
+        - Mot de passe : `password2`
+    - `user3` :
+        - Mail : `jack.smith@example.com`
+        - Mot de passe : `password3`
 
 ## Prérequis
 ### Versions
