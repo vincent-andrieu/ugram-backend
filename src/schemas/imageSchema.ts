@@ -43,18 +43,16 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
     public async getPaginatedImages(
         page: number,
         size: number,
-        search?: string,
-        userFilter: Array<ObjectId> = []
+        search?: string
     ) {
-        const query: FilterQuery<Image> = {
-            $and: [{ _id: { $nin: userFilter } }]
-        };
+        const query: FilterQuery<Image> = {};
+        console.log("ii");
         if (search)
             query.$and?.push({
                 $or: [
@@ -68,7 +66,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
     public async updatePost(
