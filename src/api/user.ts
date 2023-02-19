@@ -123,8 +123,8 @@ export default class UserRoutes extends TemplateRoutes {
         this._route<never, Array<RawUser> | string>("get", "/users", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
-            const page = Number(req.query.page) || 0;
-            const size = Number(req.query.size) || 10;
+            const page = Number(req.query.page || 0);
+            const size = Number(req.query.size || 10);
             const search = req.query.search;
             const userFilter = (req.query.userFilter as Array<string>)?.map((userId: string) => toObjectId(userId)) || [];
 
