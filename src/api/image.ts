@@ -5,7 +5,7 @@ import Image from "@classes/image";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
 import { upload } from "../init/aws";
-import { isObjectId, ObjectId, toObjectId } from "../utils";
+import { ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
@@ -48,7 +48,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
         /**
      * @swagger
-     * /image/{id}:
+     * /image/list/{id}:
      *   get:
      *     description: Get image by ID
      *     tags:
@@ -68,7 +68,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-        this._route<never, Image>("get", "/image/:id", async (req, res) => {
+        this._route<never, Image>("get", "/image/list/:id", async (req, res) => {
             const image = await this._imageSchema.get(
                 toObjectId(req.params.id)
             );
@@ -286,12 +286,6 @@ export default class ImageRoutes extends TemplateRoutes {
      *         description: Search string to search a user by first name, last name, email or phone
      *         type: string
      *         in: query
-     *       - name: imageFilter
-     *         description: Array of user IDs to exclude from the result
-     *         type: array
-     *         items:
-     *           type: string
-     *         in: query
      *     responses:
      *       200:
      *         description: List of images
@@ -312,23 +306,15 @@ export default class ImageRoutes extends TemplateRoutes {
                     throw new Error("Authenticated user not found");
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
-                const search = req.query.search;
-                const imageFilter =
-                    (req.query.imageFilter as Array<string>)?.map((userId: string) =>
-                        toObjectId(userId)
-                    ) || [];
+                const search = req.query.search || "";
 
-                if (!page || !size || page < 0 || size < 0 || (search && typeof search !== "string") ||
-                    !Array.isArray(imageFilter) ||
-                    imageFilter.some((userId) => !isObjectId(userId))
-                )
+                console.log(page, size, search);
+                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || (search && typeof search !== "string"))
                     return res.status(400).send("Invalid parameters");
-                imageFilter.push(req.user._id);
                 const result = await this._imageSchema.getPaginatedImages(
                     page,
                     size,
-                    search,
-                    imageFilter
+                    search
                 );
 
                 res.send(result);
@@ -355,12 +341,6 @@ export default class ImageRoutes extends TemplateRoutes {
      *         description: Search string to search a user by first name, last name, email or phone
      *         type: string
      *         in: query
-     *       - name: userFilter
-     *         description: Array of user IDs to exclude from the result
-     *         type: array
-     *         items:
-     *           type: string
-     *         in: query
      *       - name: id
      *         description: User ID
      *         type: string
@@ -386,19 +366,11 @@ export default class ImageRoutes extends TemplateRoutes {
                 const target = toObjectId(req.params.id);
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
-                const search = req.query.search;
-                const imageFilter =
-                    (req.query.imageFilter as Array<string>)?.map((userId: string) =>
-                        toObjectId(userId)
-                    ) || [];
+                const search = req.query.search || "";
 
-                if (!page || !size || page < 0 || size < 0 || target === null ||
-                    (search && typeof search !== "string") ||
-                    !Array.isArray(imageFilter) ||
-                    imageFilter.some((userId) => !isObjectId(userId))
-                )
+                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || target === null ||
+                    (search && typeof search !== "string"))
                     return res.status(400).send("Invalid parameters");
-                imageFilter.push(req.user._id);
                 const result = await this._imageSchema.getPaginatedImagesByUser(
                     target,
                     page,

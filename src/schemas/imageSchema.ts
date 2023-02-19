@@ -49,12 +49,10 @@ export default class ImageSchema extends TemplateSchema<Image> {
     public async getPaginatedImages(
         page: number,
         size: number,
-        search?: string,
-        userFilter: Array<ObjectId> = []
+        search?: string
     ) {
-        const query: FilterQuery<Image> = {
-            $and: [{ _id: { $nin: userFilter } }]
-        };
+        const query: FilterQuery<Image> = {};
+        console.log("ii");
         if (search)
             query.$and?.push({
                 $or: [
