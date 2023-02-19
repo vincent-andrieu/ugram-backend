@@ -150,7 +150,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
                 const tags: string | null = (req.body as RequestBody)?.tags || null;
 
-                const checkedTags = tags?.split(",")?.map((tag) => toObjectId(tag));
+                const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
                 const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
 
                 const url = (req.file as Express.MulterS3.File).location;
@@ -161,7 +161,7 @@ export default class ImageRoutes extends TemplateRoutes {
                     author: toObjectId(req.user._id),
                     description,
                     url,
-                    tags: checkedTags ?? [],
+                    tags: checkedTags,
                     hashtags: hashtags ?? [""]
                 });
                 const image = await this._imageSchema.add(
@@ -321,7 +321,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
         /**
      * @swagger
-     * /image/list/{id}:
+     * /image/user/{id}:
      *   get:
      *     description: Get list of all images from user
      *     tags:

@@ -32,7 +32,7 @@ export default class Image extends TemplateObject {
             throw "Invalid description";
         if (this.hashtags && (!Array.isArray(this.hashtags) || this.hashtags.some(hashtag => typeof hashtag !== "string")))
             throw "Invalid hashtags";
-        if (this.tags && (!Array.isArray(this.tags) || !(this.tags.some(tag => isObjectId(tag)))))
+        if (this.tags && (!Array.isArray(this.tags) || (this.tags.length > 0 && !(this.tags.some(tag => isObjectId(tag))))))
             throw "Invalid tags";
         if (this.createdAt && (!(this.createdAt instanceof Date) || this.createdAt.getTime() > Date.now()))
             throw "Invalid createdAt";
