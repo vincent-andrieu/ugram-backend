@@ -316,8 +316,6 @@ export default class ImageRoutes extends TemplateRoutes {
             "get",
             "/image/list",
             async (req, res) => {
-                if (!req.user?._id)
-                    throw new Error("Authenticated user not found");
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
                 const search = req.query.search || "";
@@ -374,8 +372,6 @@ export default class ImageRoutes extends TemplateRoutes {
             "get",
             "/image/user/:id",
             async (req, res) => {
-                if (!req.user?._id)
-                    throw new Error("Authenticated user not found");
                 const target = toObjectId(req.params.id);
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
