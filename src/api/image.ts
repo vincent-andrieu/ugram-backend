@@ -2,6 +2,7 @@ import { Express } from "express";
 import { RequestBody } from "swagger-jsdoc";
 
 import Image from "@classes/image";
+import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
 import { upload } from "../init/aws";
@@ -12,8 +13,10 @@ export default class ImageRoutes extends TemplateRoutes {
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
 
-    constructor(app: Express) {
+    constructor(app: Express, routeWhitelister: RouteWhitelister) {
         super(app);
+
+        routeWhitelister("/image/list");
 
         this._init();
     }
