@@ -84,7 +84,7 @@ export default class UserRoutes extends TemplateRoutes {
 
         /**
          * @swagger
-         * /user/list:
+         * /users:
          *   get:
          *     description: Get a list of users
          *     tags:
@@ -120,15 +120,15 @@ export default class UserRoutes extends TemplateRoutes {
          *       401:
          *         description: Unauthorized
          */
-        this._route<never, Array<RawUser> | string>("get", "/user/list", async (req, res) => {
+        this._route<never, Array<RawUser> | string>("get", "/users", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
-            const page = Number(req.query.page) || 0;
-            const size = Number(req.query.size) || 10;
+            const page = Number(req.query.page || 0);
+            const size = Number(req.query.size || 10);
             const search = req.query.search;
             const userFilter = (req.query.userFilter as Array<string>)?.map((userId: string) => toObjectId(userId)) || [];
 
-            if (!page || !size || page < 0 || size < 0 ||
+            if (Number.isNaN(page) || Number.isNaN(size) || page < 0 || size < 0 ||
                 (search && typeof search !== "string") ||
                 !Array.isArray(userFilter) || userFilter.some((userId) => !isObjectId(userId))
             )
@@ -183,6 +183,8 @@ export default class UserRoutes extends TemplateRoutes {
             const user = new User(req.body);
             let fields = "";
 
+            if (user.useName)
+                fields += " useName";
             if (user.firstName)
                 fields += " firstName";
             if (user.lastName)

@@ -32,7 +32,7 @@ async function main() {
     new HealthRoutes(app, authentificationMiddleware.whitelistRoute);
     new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
-    new ImageRoutes(app);
+    new ImageRoutes(app, authentificationMiddleware.whitelistRoute);
 
     // Error middlewares
     app.use(errorLoggerMiddleware);

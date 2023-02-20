@@ -31,7 +31,7 @@ export default class TemplateRoutes {
         );
     }
 
-    private _wrapper<P, ResBody, ReqBody>(request: Request<P, ResBody, ReqBody>, response: Response<ResBody>, next: NextFunction, handler: RequestHandler<P, ResBody, ReqBody>): void {
+    private async _wrapper<P, ResBody, ReqBody>(request: Request<P, ResBody, ReqBody>, response: Response<ResBody>, next: NextFunction, handler: RequestHandler<P, ResBody, ReqBody>): Promise<void> {
         if (mongoose.connection.readyState !== mongoose.ConnectionStates.connected) {
             response.sendStatus(503);
             console.log("Database not connected:", mongoose.connection.readyState);
@@ -41,15 +41,16 @@ export default class TemplateRoutes {
         this._setHeader(response, this._defaultHeader);
 
         try {
-            handler(request, response, next);
+            // DO NOT REMOVE THIS AWAIT ! Otherwise the error won't be catched
+            await handler(request, response, next) as Promise<void> | void;
         } catch (error) {
             this._errorHandler(error, request, response, next);
         }
     }
 
-    private _errorHandler<P, ResBody, ReqBody, ReqQuery>(error: unknown, _req: Request<P, ResBody, ReqBody, ReqQuery>, _res: Response, next: NextFunction): void {
+    private _errorHandler<P, ResBody, ReqBody, ReqQuery>(error: unknown, _req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response, next: NextFunction): void {
         if (typeof error === "string")
-            next(new Error(error));
+            res.status(400).send(error);
         else if (error instanceof Error)
             next(error);
         else

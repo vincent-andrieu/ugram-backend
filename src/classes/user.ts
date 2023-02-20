@@ -50,24 +50,24 @@ export default class User extends TemplateObject {
 
     protected _validation() {
         if (this.useName && typeof this.useName !== "string")
-            throw new Error("Invalid useName");
+            throw "Invalid useName";
         if (this.firstName && (typeof this.firstName !== "string" || this.firstName.length === 0))
-            throw new Error("Invalid firstName");
+            throw "Invalid firstName";
         if (this.lastName && (typeof this.lastName !== "string" || this.lastName.length === 0))
-            throw new Error("Invalid lastName");
+            throw "Invalid lastName";
         if (this.email && (typeof this.email !== "string" || !RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/).test(this.email)))
-            throw new Error("Invalid email");
+            throw "Invalid email";
         if (this.avatar && (typeof this.avatar !== "string" || (!RegExp(/^data:image\/(png|jpg|jpeg);base64,/).test(this.avatar) && !this.avatar.startsWith("https://"))))
-            throw new Error("Invalid avatar");
-        if (this.phone && (typeof this.phone !== "string" || !RegExp(/^\+?[0-9]+$/).test(this.phone)))
-            throw new Error("Invalid phone");
+            throw "Invalid avatar";
+        if (this.phone && (typeof this.phone !== "string" || !RegExp(/^\+?[0-9\s()-]{10,}$/).test(this.phone)))
+            throw "Invalid phone";
         if (this.registrationDate && (!(this.registrationDate instanceof Date) || this.registrationDate.getTime() > Date.now()))
-            throw new Error("Invalid registrationDate");
+            throw "Invalid registrationDate";
 
         // Auth
         if (this.auth)
             if (this.auth.password && (typeof this.auth.password !== "string" || this.auth.password.length < 5))
-                throw new Error("Invalid password");
+                throw "Invalid password";
     }
 
 }

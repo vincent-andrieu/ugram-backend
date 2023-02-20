@@ -1,4 +1,4 @@
-import { isObjectId, ObjectId, toObjectId } from "../utils";
+import { isObjectId, NonFunctionProperties, ObjectId, toObjectId } from "../utils";
 import TemplateObject from "./templateObject";
 
 export default class Image extends TemplateObject {
@@ -9,7 +9,7 @@ export default class Image extends TemplateObject {
     createdAt?: Date;
     url?: string;
 
-    constructor(image: Image) {
+    constructor(image: NonFunctionProperties<Image>) {
         super(image);
 
         if (image.author)
@@ -27,16 +27,16 @@ export default class Image extends TemplateObject {
 
     protected _validation() {
         if (this.author && !isObjectId(this.author))
-            throw new Error("Invalid author");
+            throw "Invalid author";
         if (this.description && typeof this.description !== "string")
-            throw new Error("Invalid description");
+            throw "Invalid description";
         if (this.hashtags && (!Array.isArray(this.hashtags) || this.hashtags.some(hashtag => typeof hashtag !== "string")))
-            throw new Error("Invalid hashtags");
-        if (this.tags && (!Array.isArray(this.tags) || this.tags.some(tag => isObjectId(tag))))
-            throw new Error("Invalid tags");
+            throw "Invalid hashtags";
+        if (this.tags && (!Array.isArray(this.tags) || (this.tags.length > 0 && !(this.tags.some(tag => isObjectId(tag))))))
+            throw "Invalid tags";
         if (this.createdAt && (!(this.createdAt instanceof Date) || this.createdAt.getTime() > Date.now()))
-            throw new Error("Invalid createdAt");
+            throw "Invalid createdAt";
         if (this.url && typeof this.url !== "string")
-            throw new Error("Invalid url");
+            throw "Invalid url";
     }
 }

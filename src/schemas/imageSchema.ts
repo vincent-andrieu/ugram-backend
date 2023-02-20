@@ -10,10 +10,10 @@ const imageSchema = new mongoose.Schema<Image>(
             ref: "users",
             required: true
         },
-        description: { type: String, required: true },
+        description: { type: String },
         url: { type: String, required: true },
         hashtags: [{ type: String }],
-        tags: [{ type: String, ref: "users" }],
+        tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
         createdAt: { type: Date, default: Date.now }
     },
     {
@@ -43,18 +43,15 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
     public async getPaginatedImages(
         page: number,
         size: number,
-        search?: string,
-        userFilter: Array<ObjectId> = []
+        search?: string
     ) {
-        const query: FilterQuery<Image> = {
-            $and: [{ _id: { $nin: userFilter } }]
-        };
+        const query: FilterQuery<Image> = {};
         if (search)
             query.$and?.push({
                 $or: [
@@ -68,25 +65,31 @@ export default class ImageSchema extends TemplateSchema<Image> {
             limit: size
         }).sort({ createdAt: -1 });
 
-        return images.map((image) => new Image(image.toObject()));
+        return images.map((image) => new Image(image.toObject())) || [];
     }
 
-    public async uploadPost(
+    public async updatePost(
+        imageId: ObjectId,
         userId: ObjectId,
-        url: string,
         description: string,
         tags: ObjectId[],
         hashtags: Array<string>
     ): Promise<Image> {
-        const image = new Image({
-            author: userId,
-            url,
-            description,
-            tags,
-            hashtags
-        } as Image);
+        const image = await this._model.findOneAndUpdate(
+            {
+                _id: imageId,
+                author: userId
+            },
+            {
+                description,
+                tags,
+                hashtags
+            }
+        );
 
-        return this.add(image);
+        if (!image) throw new Error("Image not found");
+
+        return new Image(image.toObject());
     }
 
     public async deletePost(imageId: ObjectId, userId: ObjectId): Promise<void> {

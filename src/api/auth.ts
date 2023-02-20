@@ -6,7 +6,7 @@ import TemplateRoutes from "./templateRoutes";
 
 export default class AuthRoutes extends TemplateRoutes {
     private readonly _defaultAuthenticateOptions: Readonly<AuthenticateOptions> = {
-        // failureRedirect: this._clientUrl + "/auth/login",
+        failureRedirect: this._clientUrl + "/auth/failure",
         successRedirect: this._clientUrl + "/auth/success"
     };
 
@@ -76,7 +76,7 @@ export default class AuthRoutes extends TemplateRoutes {
          *         required: false
          *     responses:
          *       302:
-         *         description: Successfully logged in or registered. Redirected to /auth/success
+         *         description: Redirect to /auth/success or /auth/failure depending on the result
          *       401:
          *         description: Unauthorized
          */
