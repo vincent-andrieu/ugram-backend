@@ -33,7 +33,7 @@ async function checkAuthentification(_accessToken: string, _refreshToken: string
             if (!profile.verified)
                 return done(null, undefined, { message: "Discord account not verified" });
             const newUser = await userSchema.add(new User({
-                firstName: profile.username,
+                useName: profile.username,
                 email: profile.email,
                 avatar: profile.id && profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}` : undefined,
                 auth: {
