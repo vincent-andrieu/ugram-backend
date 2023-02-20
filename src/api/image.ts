@@ -151,18 +151,24 @@ export default class ImageRoutes extends TemplateRoutes {
                 const tags: string | null = (req.body as RequestBody)?.tags || null;
 
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
+                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
+
+                let parsedHashtags = hashtags.split(",");
+                if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
+                    parsedHashtags = [];
 
                 const url = (req.file as Express.MulterS3.File).location;
+
                 if (checkedTags)
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
+
                 const imageSchema = new Image({
                     author: toObjectId(req.user._id),
                     description,
                     url,
                     tags: checkedTags,
-                    hashtags: hashtags ?? [""]
+                    hashtags: parsedHashtags
                 });
                 const image = await this._imageSchema.add(
                     imageSchema
@@ -213,22 +219,28 @@ export default class ImageRoutes extends TemplateRoutes {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
-                const description = (req.body as RequestBody).description || "";
-                const tags: Array<ObjectId> = ((req.body as RequestBody).tags || "")
-                    .split(",")
-                    .map((tag: string) => toObjectId(tag));
-                const hashtags: Array<string> = (req.body as RequestBody).hashtags?.split(",");
                 const imageId = (req.body as RequestBody).imageId;
+                const description = (req.body as RequestBody)?.description || "";
 
-                if (!(await this._userSchema.exist(tags)))
-                    throw "Tagged users not found";
+                const tags: string | null = (req.body as RequestBody)?.tags || null;
+
+                const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
+                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
+
+                let parsedHashtags = hashtags.split(",");
+                if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
+                    parsedHashtags = [];
+
+                if (checkedTags)
+                    if (!(await this._userSchema.exist(checkedTags)))
+                        throw "Tagged users not found";
 
                 const image = await this._imageSchema.updatePost(
                     imageId,
                     req.user._id,
                     description,
-                    tags,
-                    hashtags
+                    checkedTags,
+                    parsedHashtags
                 );
                 res.send(image);
             }
