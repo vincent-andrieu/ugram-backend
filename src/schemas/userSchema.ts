@@ -29,31 +29,31 @@ const userSchema = new mongoose.Schema<User>({
 });
 
 export default class UserSchema extends TemplateSchema<User> {
-    private readonly _salt: string;
+    private readonly _salt?: string;
 
     constructor() {
         super(User, "users", userSchema);
 
-        if (!env.PASSWORDS_SALT)
-            throw new Error("PASSWORDS_SALT environment variable not found");
+        // if (!env.PASSWORDS_SALT)
+        //     throw new Error("PASSWORDS_SALT environment variable not found");
         this._salt = env.PASSWORDS_SALT;
     }
 
     public async add(obj: User): Promise<User> {
         if (obj.auth?.password)
-            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt);
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt ?? 10);
         return super.add(obj);
     }
 
     public async update(obj: User): Promise<User> {
         if (obj.auth?.password)
-            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt);
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt ?? 10);
         return super.update(obj);
     }
 
     public async updateById(id: mongoose.Types.ObjectId, obj: Omit<User, "_id">, fields?: string): Promise<User> {
         if (obj.auth?.password)
-            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt);
+            obj.auth.password = bcrypt.hashSync(obj.auth.password, this._salt ?? 10);
         return super.updateById(id, obj, fields);
     }
 
