@@ -1,4 +1,5 @@
 import { Scope } from "@oauth-everything/passport-discord";
+import { MongooseError } from "mongoose";
 import passport from "passport";
 import { Profile, Strategy } from "passport-discord";
 import { VerifyCallback } from "passport-oauth2";
@@ -53,6 +54,8 @@ async function registerAuthentification(_accessToken: string, _refreshToken: str
 
         done(null, { _id: user._id });
     } catch (error) {
+        if ((error as MongooseError & { code?: number }).code === 11000)
+            done(null, undefined, { message: "User already exists" });
         done(error as Error);
     }
 }

@@ -1,3 +1,4 @@
+import { MongooseError } from "mongoose";
 import passport from "passport";
 import { Profile, Strategy } from "passport-github2";
 import { VerifyCallback, VerifyFunction } from "passport-oauth2";
@@ -55,6 +56,8 @@ const registerAuthentification: VerifyFunction = async (_accessToken: string, _r
 
         done(null, { _id: user._id });
     } catch (error) {
+        if ((error as MongooseError & { code?: number }).code === 11000)
+            done(null, undefined, { message: "User already exists" });
         done(error as Error);
     }
 };

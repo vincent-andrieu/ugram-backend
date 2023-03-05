@@ -1,5 +1,6 @@
+import { MongooseError } from "mongoose";
 import passport from "passport";
-import { Strategy, Profile, VerifyCallback } from "passport-google-oauth20";
+import { Profile, Strategy, VerifyCallback } from "passport-google-oauth20";
 import { env, nextTick } from "process";
 
 import User from "@classes/user";
@@ -53,6 +54,8 @@ async function registerAuthentification(_accessToken: string, _refreshToken: str
 
         done(null, { _id: user._id });
     } catch (error) {
+        if ((error as MongooseError & { code?: number }).code === 11000)
+            done(null, undefined, { message: "User already exists" });
         done(error as Error);
     }
 }
