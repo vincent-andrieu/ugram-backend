@@ -7,14 +7,14 @@ import User from "@classes/user";
 import UserSchema from "@schemas/userSchema";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention
-const checkAuthentification: VerifyFunction = async (_accessToken: string, _refreshToken: string, profile: Profile & { _json: any }, done: VerifyCallback) => {
+const loginAuthentification: VerifyFunction = async (_accessToken: string, _refreshToken: string, profile: Profile & { _json: any }, done: VerifyCallback) => {
     if (!profile._json.email)
         return done(null, undefined, { message: "Github email not found" });
     const userSchema = new UserSchema();
     const user = await userSchema.findByEmail(profile._json.email);
 
-    if (user) {
-        if (!user._id)
+    try {
+        if (!user?._id)
             return done(null, undefined, { message: "Invalid user id" });
         if (!user.auth?.sources.github)
             userSchema.updateById(user._id, {
@@ -28,9 +28,19 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
             });
 
         done(null, { _id: user._id });
-    } else {
+    } catch (error) {
+        done(error as Error);
+    }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention
+const registerAuthentification: VerifyFunction = async (_accessToken: string, _refreshToken: string, profile: Profile & { _json: any }, done: VerifyCallback) => {
+    if (!profile._json.email)
+        return done(null, undefined, { message: "Github email not found" });
+
+    try {
         const names = (profile._json.name as string).split(" ");
-        const newUser = await userSchema.add(new User({
+        const user = await new UserSchema().add(new User({
             useName: profile.displayName,
             firstName: names[0] || profile.name?.givenName,
             lastName: (names.length === 2 ? names[1] : names[3]) || profile.name?.familyName,
@@ -43,7 +53,9 @@ const checkAuthentification: VerifyFunction = async (_accessToken: string, _refr
             }
         }));
 
-        done(null, { _id: newUser._id });
+        done(null, { _id: user._id });
+    } catch (error) {
+        done(error as Error);
     }
 };
 
@@ -51,10 +63,16 @@ nextTick(() => {
     if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET)
         throw new Error("Invalid github config");
 
-    passport.use("github", new Strategy({
+    passport.use("github-login", new Strategy({
         clientID: env.GITHUB_CLIENT_ID,
         clientSecret: env.GITHUB_CLIENT_SECRET,
-        callbackURL: "/auth/github/callback",
+        callbackURL: "/auth/github/login/callback",
         scope: ["user:email"]
-    }, checkAuthentification));
+    }, loginAuthentification));
+    passport.use("github-register", new Strategy({
+        clientID: env.GITHUB_CLIENT_ID,
+        clientSecret: env.GITHUB_CLIENT_SECRET,
+        callbackURL: "/auth/github/register/callback",
+        scope: ["user:email"]
+    }, registerAuthentification));
 });
