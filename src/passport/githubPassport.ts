@@ -69,13 +69,13 @@ nextTick(() => {
     passport.use("github-login", new Strategy({
         clientID: env.GITHUB_CLIENT_ID,
         clientSecret: env.GITHUB_CLIENT_SECRET,
-        callbackURL: "/auth/github/login/callback",
+        callbackURL: "/auth/github/callback/login",
         scope: ["user:email"]
     }, loginAuthentification));
     passport.use("github-register", new Strategy({
         clientID: env.GITHUB_CLIENT_ID,
         clientSecret: env.GITHUB_CLIENT_SECRET,
-        callbackURL: "/auth/github/register/callback",
+        callbackURL: "/auth/github/callback/register",
         scope: ["user:email"]
     }, registerAuthentification));
 });

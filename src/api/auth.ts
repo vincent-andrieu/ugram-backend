@@ -152,7 +152,8 @@ export default class AuthRoutes extends TemplateRoutes {
          *         description: Successfully redirected to github auth page
          */
         this._route("get", "/auth/github/login", passport.authenticate("github-login"));
-        this._route("get", "/auth/github/login/callback", passport.authenticate("github-login", this._defaultLoginAuthenticateOptions));
+        // GitHub auth callbacks must be the same base between login and register
+        this._route("get", "/auth/github/callback/login", passport.authenticate("github-login", this._defaultLoginAuthenticateOptions));
         /**
          * @swagger
          * /auth/github/register:
@@ -166,7 +167,8 @@ export default class AuthRoutes extends TemplateRoutes {
          *         description: Successfully redirected to github auth page
          */
         this._route("get", "/auth/github/register", passport.authenticate("github-register"));
-        this._route("get", "/auth/github/register/callback", passport.authenticate("github-register", this._defaultRegisterAuthenticateOptions));
+        // GitHub auth callbacks must be the same base between login and register
+        this._route("get", "/auth/github/callback/register", passport.authenticate("github-register", this._defaultRegisterAuthenticateOptions));
 
         /**
          * @swagger
