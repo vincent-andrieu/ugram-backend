@@ -277,7 +277,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
             await this._imageSchema.deletePost(toObjectId(req.params.id), req.user._id);
 
-            res.status(200);
+            res.status(200).send();
         });
 
         /**
