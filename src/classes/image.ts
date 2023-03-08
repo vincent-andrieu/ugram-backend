@@ -8,6 +8,7 @@ export default class Image extends TemplateObject {
     tags?: Array<ObjectId>;
     createdAt?: Date;
     url?: string;
+    key?: string; // AWS S3 key
 
     constructor(image: NonFunctionProperties<Image>) {
         super(image);
@@ -21,6 +22,7 @@ export default class Image extends TemplateObject {
             this.tags = this.tags.map(tag => toObjectId(tag));
         this.createdAt = image.createdAt || new Date();
         this.url = image.url;
+        this.key = image.key;
 
         this._validation();
     }
@@ -38,5 +40,7 @@ export default class Image extends TemplateObject {
             throw "Invalid createdAt";
         if (this.url && typeof this.url !== "string")
             throw "Invalid url";
+        if (this.key && typeof this.key !== "string")
+            throw "Invalid key";
     }
 }
