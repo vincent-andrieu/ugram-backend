@@ -5,11 +5,12 @@ import Image from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
-import { AWS_BUCKET, getS3Params, s3, upload } from "../init/aws";
+import AWSService from "../init/aws";
 import { ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
+    private _awsService = new AWSService();
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
 
@@ -107,7 +108,7 @@ export default class ImageRoutes extends TemplateRoutes {
         this._route<never, { url: string }>(
             "post",
             "/image/avatar",
-            upload.single("file"),
+            this._awsService.multer.single("file"),
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
@@ -147,7 +148,7 @@ export default class ImageRoutes extends TemplateRoutes {
         this._route<RequestBody, Image>(
             "post",
             "/image/post",
-            upload.single("file"),
+            this._awsService.multer.single("file"),
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
@@ -277,9 +278,9 @@ export default class ImageRoutes extends TemplateRoutes {
 
             if (!image._id || !image.key)
                 throw "Image not found";
-            s3.deleteObject({
+            this._awsService.s3.deleteObject({
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                Bucket: AWS_BUCKET,
+                Bucket: this._awsService.bucket,
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 Key: image.key
             }, async (error) => {
