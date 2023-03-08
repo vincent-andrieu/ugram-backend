@@ -107,7 +107,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
         }, projection);
 
         if (!image)
-            throw new Error("Image not found");
+            throw "Image not found";
         return new Image(image.toObject());
     }
 }
