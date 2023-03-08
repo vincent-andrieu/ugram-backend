@@ -5,7 +5,7 @@ import Image from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
-import { upload } from "../init/aws";
+import { AWS_BUCKET, getS3Params, s3, upload } from "../init/aws";
 import { ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
@@ -112,6 +112,8 @@ export default class ImageRoutes extends TemplateRoutes {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
+                if (!req.file)
+                    throw new Error("No file found in request");
                 const url = (req.file as Express.MulterS3.File).location;
 
                 await this._userSchema.updateAvatar(req.user._id, url);
@@ -142,26 +144,21 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-        this._route<never, Image>(
+        this._route<RequestBody, Image>(
             "post",
             "/image/post",
             upload.single("file"),
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
-                const description = (req.body as RequestBody)?.description || "";
-
-                const tags: string | null = (req.body as RequestBody)?.tags || null;
-
+                const description = req.body?.description || "";
+                const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
-
+                const hashtags: string = req.body?.hashtags || "";
                 let parsedHashtags = hashtags.split(",");
+
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
                     parsedHashtags = [];
-
-                const url = (req.file as Express.MulterS3.File).location;
-
                 if (checkedTags)
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
@@ -169,7 +166,8 @@ export default class ImageRoutes extends TemplateRoutes {
                 const imageSchema = new Image({
                     author: toObjectId(req.user._id),
                     description,
-                    url,
+                    url: (req.file as Express.MulterS3.File).location,
+                    key: (req.file as Express.MulterS3.File).key,
                     tags: checkedTags,
                     hashtags: parsedHashtags
                 });
@@ -215,20 +213,20 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-        this._route<never, Image>(
+        this._route<RequestBody, Image>(
             "put",
             "/image/post",
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
-                const imageId = (req.body as RequestBody).imageId;
-                const description = (req.body as RequestBody)?.description || "";
+                const imageId = req.body.imageId;
+                const description = req.body?.description || "";
 
-                const tags: string | null = (req.body as RequestBody)?.tags || null;
+                const tags: string | null = req.body?.tags || null;
 
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
+                const hashtags: string = req.body?.hashtags || "";
 
                 let parsedHashtags = hashtags.split(",");
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
@@ -275,9 +273,23 @@ export default class ImageRoutes extends TemplateRoutes {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
 
-            await this._imageSchema.deletePost(toObjectId(req.params.id), req.user._id);
+            const image = await this._imageSchema.getUserImage(req.user._id, toObjectId(req.params.id), "key");
 
-            res.status(200);
+            if (!image._id || !image.key)
+                throw "Image not found";
+            s3.deleteObject({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Bucket: AWS_BUCKET,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Key: image.key
+            }, async (error) => {
+                if (error)
+                    throw error;
+
+                await this._imageSchema.deletePost(image._id as ObjectId, req.user?._id as ObjectId);
+
+                res.status(200);
+            });
         });
 
         /**

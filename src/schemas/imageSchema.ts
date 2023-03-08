@@ -12,6 +12,7 @@ const imageSchema = new mongoose.Schema<Image>(
         },
         description: { type: String },
         url: { type: String, required: true },
+        key: { type: String, required: true, select: false },
         hashtags: [{ type: String }],
         tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
         createdAt: { type: Date, default: Date.now }
@@ -97,5 +98,16 @@ export default class ImageSchema extends TemplateSchema<Image> {
             _id: imageId,
             author: userId
         });
+    }
+
+    public async getUserImage(userId: ObjectId, imageId: ObjectId, projection?: string): Promise<Image> {
+        const image = await this._model.findOne({
+            _id: imageId,
+            author: userId
+        }, projection);
+
+        if (!image)
+            throw new Error("Image not found");
+        return new Image(image.toObject());
     }
 }
