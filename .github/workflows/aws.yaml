@@ -25,7 +25,6 @@ jobs:
       - name: Create build
         run: npm run build
 
-      - run: ls -la
       - name: Generate deployment package
         run: zip -r deploy.zip * -x "**.git**"
 
@@ -41,5 +40,5 @@ jobs:
           application_name: ugram-backend
           environment_name: Ugrambackend-env-1
           region: us-east-2
-          version_label: "app-version-$GITHUB_OUTPUT"
+          version_label: "{{$GITHUB_OUTPUT}}"
           deployment_package: deploy.zip
