@@ -211,7 +211,7 @@ export default class UserRoutes extends TemplateRoutes {
          *       401:
          *         description: Unauthorized
          */
-        this._route("delete", "/user", async (req, res) => {
+        this._route("delete", "/user", async (req, res, next) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
 
@@ -219,7 +219,12 @@ export default class UserRoutes extends TemplateRoutes {
                 this._imageSchema.deleteUserImages(req.user._id),
                 this._userSchema.delete(req.user._id)
             ]);
-            res.sendStatus(200);
+
+            req.logout((error) => {
+                if (error)
+                    return next(error);
+                res.sendStatus(200);
+            });
         });
 
     }
