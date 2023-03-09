@@ -40,5 +40,5 @@ jobs:
           application_name: ugram-backend
           environment_name: Ugrambackend-env-1
           region: us-east-2
-          version_label: "{{$GITHUB_OUTPUT}}"
+          version_label: "${{GITHUB_OUTPUT}}"
           deployment_package: deploy.zip
