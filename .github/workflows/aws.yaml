@@ -22,8 +22,11 @@ jobs:
       - name: Installing dependencies
         run: npm ci
 
+      - name: Create build
+        run: npm run build
+
       - name: Generate deployment package
-        run: zip -r deploy.zip * -x "**node_modules**"
+        run: zip -r deploy.zip * -x "**.git**"
 
       - name: Get current date
         id: date
