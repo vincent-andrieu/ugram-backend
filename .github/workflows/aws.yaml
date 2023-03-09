@@ -40,5 +40,5 @@ jobs:
           application_name: ugram-backend
           environment_name: Ugrambackend-env-1
           region: us-east-2
-          version_label: "${{ steps.date.outputs.date }}"
+          version_label: "app-version-${{ steps.date.outputs.date }}"
           deployment_package: deploy.zip
