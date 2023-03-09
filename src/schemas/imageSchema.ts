@@ -104,4 +104,12 @@ export default class ImageSchema extends TemplateSchema<Image> {
             throw "Image not found";
         return new Image(image.toObject());
     }
+
+    public async getUserImages(userId: ObjectId, projection?: string): Promise<Array<Image>> {
+        const images = await this._model.find({
+            author: userId
+        }, projection);
+
+        return images.map((image) => new Image(image.toObject()));
+    }
 }

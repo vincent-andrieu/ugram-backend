@@ -1,12 +1,14 @@
 import { Express } from "express";
 
 import User, { RawUser } from "@classes/user";
-import UserSchema from "@schemas/userSchema";
-import TemplateRoutes from "./templateRoutes";
-import { toObjectId, isObjectId } from "../utils";
 import ImageSchema from "@schemas/imageSchema";
+import UserSchema from "@schemas/userSchema";
+import AWSService from "../init/aws";
+import { isObjectId, toObjectId } from "../utils";
+import TemplateRoutes from "./templateRoutes";
 
 export default class UserRoutes extends TemplateRoutes {
+    private _awsService = new AWSService();
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
 
@@ -214,6 +216,18 @@ export default class UserRoutes extends TemplateRoutes {
         this._route("delete", "/user", async (req, res, next) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
+
+            const images = await this._imageSchema.getUserImages(req.user._id, "key");
+
+            this._awsService.s3.deleteObjects({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Bucket: this._awsService.bucket,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Delete: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Objects: images.map((image) => ({ Key: image.key }))
+                }
+            });
 
             await Promise.all([
                 this._imageSchema.deleteUserImages(req.user._id),
