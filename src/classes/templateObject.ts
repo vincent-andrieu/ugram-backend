@@ -1,10 +1,11 @@
-import { isObjectId, ObjectId } from "../utils";
+import { isObjectId, ObjectId, toObjectId } from "../utils";
 
 export default abstract class TemplateObject {
     public _id?: ObjectId;
 
     constructor(obj: { _id?: ObjectId }) {
-        this._id = obj._id;
+        if (obj._id)
+            this._id = toObjectId(obj._id);
 
         this._objectValidation();
     }
