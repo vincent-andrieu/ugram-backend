@@ -14,9 +14,9 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -26,24 +26,24 @@ jobs:
       - name: Generate deployment package
         run: zip -r deploy.zip * -x "**node_modules**"
 
-      - name: Get timestamp
-        uses: gerred/actions/current-time@master
-        id: current-time
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Run string replace
         uses: frabert/replace-string-action@master
         id: format-time
         with:
           pattern: '[:\.]+'
-          string: "${{ steps.current-time.outputs.time }}"
+          string: "${{ steps.date.outputs.date }}"
           replace-with: "-"
           flags: "g"
 
       - name: Beanstalk Deploy my app
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          aws_access_key: ${{secrets.AWS_PROD_ACCESS_KEY}}
-          aws_secret_key: ${{secrets.AWS_PROD_SECRET_KEY}}
+          aws_access_key: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws_secret_key: ${{secrets.AWS_SECRET_KEY_ID}}
           application_name: ugram-backend
           environment_name: Ugrambackend-env-1
           region: us-east-2
