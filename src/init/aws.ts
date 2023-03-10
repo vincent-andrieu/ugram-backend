@@ -30,7 +30,13 @@ export default class AWSService {
                 key: function(_req, _file, cb) {
                     cb(null, Date.now().toString());
                 }
-            })
+            }),
+            fileFilter(_req, file, callback) {
+                if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/))
+                    return callback(new Error("Only image files are allowed!"));
+
+                callback(null, true);
+            }
         });
     }
 
