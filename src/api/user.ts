@@ -219,15 +219,16 @@ export default class UserRoutes extends TemplateRoutes {
 
             const images = await this._imageSchema.getUserImages(req.user._id, "key");
 
-            this._awsService.s3.deleteObjects({
+            if (images.length > 0)
+                await this._awsService.s3.deleteObjects({
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                Bucket: this._awsService.bucket,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                Delete: {
+                    Bucket: this._awsService.bucket,
                     // eslint-disable-next-line @typescript-eslint/naming-convention
-                    Objects: images.map((image) => ({ Key: image.key }))
-                }
-            });
+                    Delete: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                        Objects: images.map((image) => ({ Key: image.key }))
+                    }
+                });
 
             await Promise.all([
                 this._imageSchema.deleteUserImages(req.user._id),
