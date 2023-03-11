@@ -152,6 +152,8 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
+                if (!req.file)
+                    throw "Invalid file";
                 const description = req.body?.description || "";
                 const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
