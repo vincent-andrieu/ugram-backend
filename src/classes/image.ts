@@ -1,8 +1,9 @@
 import { isObjectId, NonFunctionProperties, ObjectId, toObjectId } from "../utils";
 import TemplateObject from "./templateObject";
+import User from "./user";
 
 export default class Image extends TemplateObject {
-    author?: ObjectId;
+    author?: ObjectId | User;
     description?: string;
     hashtags?: Array<string>;
     tags?: Array<ObjectId>;
@@ -14,7 +15,7 @@ export default class Image extends TemplateObject {
         super(image);
 
         if (image.author)
-            this.author = toObjectId(image.author);
+            this.author = isObjectId(image.author as ObjectId) ? toObjectId(image.author as ObjectId) : new User(image.author);
         this.description = image.description;
         this.hashtags = image.hashtags;
         this.tags = image.tags;
@@ -28,8 +29,6 @@ export default class Image extends TemplateObject {
     }
 
     protected _validation() {
-        if (this.author && !isObjectId(this.author))
-            throw "Invalid author";
         if (this.description && typeof this.description !== "string")
             throw "Invalid description";
         if (this.hashtags && (!Array.isArray(this.hashtags) || this.hashtags.some(hashtag => typeof hashtag !== "string")))
