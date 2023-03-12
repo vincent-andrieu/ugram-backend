@@ -152,6 +152,8 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
+                if (!req.file)
+                    throw "Invalid file";
                 const description = req.body?.description || "";
                 const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
@@ -221,7 +223,6 @@ export default class ImageRoutes extends TemplateRoutes {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
-                const imageId = req.body.imageId;
                 const description = req.body?.description || "";
 
                 const tags: string | null = req.body?.tags || null;
@@ -237,14 +238,14 @@ export default class ImageRoutes extends TemplateRoutes {
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
 
-                const image = await this._imageSchema.updatePost(
-                    imageId,
-                    req.user._id,
-                    description,
-                    checkedTags,
-                    parsedHashtags
-                );
-                res.send(image);
+                const result = await this._imageSchema.updatePost(new Image({
+                    _id: req.body.imageId,
+                    author: req.user._id,
+                    description: description,
+                    tags: checkedTags,
+                    hashtags: parsedHashtags
+                }));
+                res.send(result);
             }
         );
 

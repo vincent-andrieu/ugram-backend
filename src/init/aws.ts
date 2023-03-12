@@ -30,7 +30,10 @@ export default class AWSService {
                 key: function(_req, _file, cb) {
                     cb(null, Date.now().toString());
                 }
-            })
+            }),
+            fileFilter(_req, file, callback) {
+                callback(null, file.mimetype.startsWith("image"));
+            }
         });
     }
 
