@@ -15,7 +15,9 @@ async function loginAuthentification(_accessToken: string, _refreshToken: string
     const user = await userSchema.findByEmail(profile.email);
 
     try {
-        if (!user?._id)
+        if (!user)
+            return done(null, undefined, { message: "User not found" });
+        if (!user._id)
             return done(null, undefined, { message: "Invalid user id" });
         if (!user.auth?.sources.discord)
             userSchema.updateById(user._id, {

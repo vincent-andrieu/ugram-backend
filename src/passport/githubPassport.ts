@@ -15,7 +15,9 @@ const loginAuthentification: VerifyFunction = async (_accessToken: string, _refr
     const user = await userSchema.findByEmail(profile._json.email);
 
     try {
-        if (!user?._id)
+        if (!user)
+            return done(null, undefined, { message: "User not found" });
+        if (!user._id)
             return done(null, undefined, { message: "Invalid user id" });
         if (!user.auth?.sources.github)
             userSchema.updateById(user._id, {

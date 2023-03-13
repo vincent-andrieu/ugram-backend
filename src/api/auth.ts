@@ -1,17 +1,19 @@
 import { RouteWhitelister } from "@middlewares/authentification";
-import { Express } from "express";
+import { Express, Request, Response } from "express";
 import passport, { AuthenticateOptions } from "passport";
 
 import TemplateRoutes from "./templateRoutes";
 
 export default class AuthRoutes extends TemplateRoutes {
     private readonly _defaultLoginAuthenticateOptions: Readonly<AuthenticateOptions> = {
-        failureRedirect: this._clientUrl + "/auth/login/failure",
-        successRedirect: this._clientUrl + "/auth/login/success"
+        failureRedirect: "/auth/login/failure",
+        successRedirect: this._clientUrl + "/auth/login/success",
+        failureMessage: true
     };
     private readonly _defaultRegisterAuthenticateOptions: Readonly<AuthenticateOptions> = {
-        failureRedirect: this._clientUrl + "/auth/register/failure",
-        successRedirect: this._clientUrl + "/auth/register/success"
+        failureRedirect: "/auth/register/failure",
+        successRedirect: this._clientUrl + "/auth/register/success",
+        failureMessage: true
     };
 
     constructor(app: Express, routeWhitelister: RouteWhitelister) {
@@ -19,6 +21,8 @@ export default class AuthRoutes extends TemplateRoutes {
 
         this._init();
 
+        routeWhitelister("/auth/login/failure");
+        routeWhitelister("/auth/register/failure");
         routeWhitelister("/auth/local");
         routeWhitelister("/auth/discord");
         routeWhitelister("/auth/github");
@@ -26,6 +30,13 @@ export default class AuthRoutes extends TemplateRoutes {
     }
 
     private _init() {
+
+        this._route("get", "/auth/login/failure", (req: Request, res: Response) => {
+            res.redirect(this._clientUrl + "/auth/login/failure?failure=" + (req.session as unknown as { messages: Array<string> }).messages[0]);
+        });
+        this._route("get", "/auth/register/failure", (req: Request, res: Response) => {
+            res.redirect(this._clientUrl + "/auth/register/failure?failure=" + (req.session as unknown as { messages: Array<string> }).messages[0]);
+        });
 
         /**
          * @swagger
