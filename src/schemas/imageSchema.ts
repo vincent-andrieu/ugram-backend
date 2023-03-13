@@ -42,7 +42,9 @@ export default class ImageSchema extends TemplateSchema<Image> {
         const images = await this._model.find({ author: userId }, undefined, {
             skip: page * size,
             limit: size
-        }).sort({ createdAt: -1 });
+        })
+            .populate("author")
+            .sort({ createdAt: -1 });
 
         return images.map((image) => new Image(image.toObject())) || [];
     }
@@ -64,7 +66,9 @@ export default class ImageSchema extends TemplateSchema<Image> {
         const images = await this._model.find(query, undefined, {
             skip: page * size,
             limit: size
-        }).sort({ createdAt: -1 });
+        })
+            .sort({ createdAt: -1 })
+            .populate("author");
 
         return images.map((image) => new Image(image.toObject())) || [];
     }
