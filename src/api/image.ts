@@ -311,7 +311,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *         type: number
      *         in: query
      *       - name: search
-     *         description: Search string to search a user by first name, last name, email or phone
+     *         description: Search string to search by hashtags and description
      *         type: string
      *         in: query
      *     responses:
@@ -332,19 +332,78 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
-                const search = req.query.search || "";
 
-                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || (search && typeof search !== "string"))
+                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0)
                     return res.status(400).send("Invalid parameters");
                 const result = await this._imageSchema.getPaginatedImages(
                     page,
-                    size,
-                    search
+                    size
                 );
 
                 res.send(result);
             }
         );
+
+        /**
+         * @swagger
+         * /image/search:
+         *   get:
+         *     description: Get list of all images from all users by a search string
+         *     tags:
+         *       - Image
+         *     parameters:
+         *       - name: page
+         *         description: Page number. Default 0
+         *         type: number
+         *         in: query
+         *       - name: size
+         *         description: Page size. Default 10
+         *         type: number
+         *         in: query
+         *       - name: search
+         *         description: Search string to search by hashtags and description. Hashtags must start by # and words split by space.
+         *         type: string
+         *         in: query
+         *     responses:
+         *       200:
+         *         description: Search result successfully returned
+         *         schema:
+         *           type: object
+         *           properties:
+         *             hashtags:
+         *               type: array
+         *               items:
+         *                 $ref: '#/definitions/Image'
+         *             description:
+         *               type: array
+         *               items:
+         *                 $ref: '#/definitions/Image'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<never, { hashtags: Array<Image>, description: Array<Image> }>("get", "/image/search", async (req, res) => {
+            const page = Number(req.query.page) || 0;
+            const size = Number(req.query.size) || 10;
+            const search = req.query.search;
+
+            if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || typeof search !== "string")
+                throw "Invalid parameters";
+
+            const hashtags: Array<string> = [];
+            const description: Array<string> = [];
+
+            search.split(" ").forEach((word) => {
+                if (word.startsWith("#")) {
+                    if (word.length > 1)
+                        hashtags.push(word.substring(1));
+                } else
+                    description.push(word);
+            });
+
+            res.send(await this._imageSchema.getSearchPaginatedImages(page, size, hashtags, description.join(" ")));
+        });
 
         /**
      * @swagger

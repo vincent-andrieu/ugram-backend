@@ -1,7 +1,8 @@
-import TemplateSchema from "./templateSchema";
-import mongoose, { FilterQuery } from "mongoose";
+import mongoose from "mongoose";
+
 import Image from "@classes/image";
 import { ObjectId } from "../utils";
+import TemplateSchema from "./templateSchema";
 
 const imageSchema = new mongoose.Schema<Image>(
     {
@@ -49,24 +50,93 @@ export default class ImageSchema extends TemplateSchema<Image> {
 
     public async getPaginatedImages(
         page: number,
-        size: number,
-        search?: string
+        size: number
     ) {
-        const query: FilterQuery<Image> = {};
-        if (search)
-            query.$and?.push({
-                $or: [
-                    { description: { $regex: search, $options: "i" } },
-                    { hashtags: { $regex: search, $options: "i" } },
-                    { tags: { $regex: search, $options: "i" } }
-                ]
-            });
-        const images = await this._model.find(query, undefined, {
+        const images = await this._model.find({}, undefined, {
             skip: page * size,
             limit: size
         }).sort({ createdAt: -1 });
 
         return images.map((image) => new Image(image.toObject())) || [];
+    }
+
+    public async getSearchPaginatedImages(
+        page: number,
+        size: number,
+        hashtags: Array<string>,
+        description: string
+    ): Promise<{ hashtags: Array<Image>, description: Array<Image> }> {
+        const descriptionWords = description.split(" ");
+        const queries = [
+            this._model.find({
+                hashtags: {
+                    $in: hashtags
+                }
+            }, undefined, {
+                skip: page * size,
+                limit: size
+            })
+                .populate("author")
+                .sort({ createdAt: -1 }),
+
+            this._model.aggregate([
+                {
+                    $addFields: {
+                        descriptionWords: {
+                            $split: ["$description", " "]
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        descriptionWords: {
+                            $in: descriptionWords
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        createdAt: -1
+                    }
+                },
+                {
+                    $skip: page * size
+                },
+                {
+                    $limit: size
+                },
+                // {
+                //     $lookup: {
+                //         from: "users",
+                //         localField: "author",
+                //         foreignField: "_id",
+                //         as: "author"
+                //     }
+                // },
+                // {
+                //     $addFields: {
+                //         author: {
+                //             $first: "$author"
+                //         }
+                //     }
+                // },
+                {
+                    $project: {
+                        key: 0,
+                        descriptionWords: 0,
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        "author.auth": 0
+                    }
+                }
+            ])
+        ];
+
+        const [hashtagsImages, descriptionImages] = await Promise.all(queries);
+
+        return {
+            hashtags: hashtagsImages.map((image) => new Image(image.toObject())),
+            description: descriptionImages.map((image) => new Image(image))
+        };
     }
 
     public async updatePost(image: Image): Promise<Image> {
