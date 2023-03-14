@@ -105,21 +105,21 @@ export default class ImageSchema extends TemplateSchema<Image> {
                 {
                     $limit: size
                 },
-                // {
-                //     $lookup: {
-                //         from: "users",
-                //         localField: "author",
-                //         foreignField: "_id",
-                //         as: "author"
-                //     }
-                // },
-                // {
-                //     $addFields: {
-                //         author: {
-                //             $first: "$author"
-                //         }
-                //     }
-                // },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "author",
+                        foreignField: "_id",
+                        as: "author"
+                    }
+                },
+                {
+                    $addFields: {
+                        author: {
+                            $first: "$author"
+                        }
+                    }
+                },
                 {
                     $project: {
                         key: 0,
