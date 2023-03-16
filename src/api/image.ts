@@ -5,11 +5,12 @@ import Image from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
-import { upload } from "../init/aws";
+import AWSService from "../init/aws";
 import { ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
+    private _awsService = new AWSService();
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
 
@@ -107,11 +108,13 @@ export default class ImageRoutes extends TemplateRoutes {
         this._route<never, { url: string }>(
             "post",
             "/image/avatar",
-            upload.single("file"),
+            this._awsService.multer.single("file"),
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
+                if (!req.file)
+                    throw new Error("No file found in request");
                 const url = (req.file as Express.MulterS3.File).location;
 
                 await this._userSchema.updateAvatar(req.user._id, url);
@@ -142,26 +145,23 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-        this._route<never, Image>(
+        this._route<RequestBody, Image>(
             "post",
             "/image/post",
-            upload.single("file"),
+            this._awsService.multer.single("file"),
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
-                const description = (req.body as RequestBody)?.description || "";
-
-                const tags: string | null = (req.body as RequestBody)?.tags || null;
-
+                if (!req.file)
+                    throw "Invalid file";
+                const description = req.body?.description || "";
+                const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
-
+                const hashtags: string = req.body?.hashtags || "";
                 let parsedHashtags = hashtags.split(",");
+
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
                     parsedHashtags = [];
-
-                const url = (req.file as Express.MulterS3.File).location;
-
                 if (checkedTags)
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
@@ -169,7 +169,8 @@ export default class ImageRoutes extends TemplateRoutes {
                 const imageSchema = new Image({
                     author: toObjectId(req.user._id),
                     description,
-                    url,
+                    url: (req.file as Express.MulterS3.File).location,
+                    key: (req.file as Express.MulterS3.File).key,
                     tags: checkedTags,
                     hashtags: parsedHashtags
                 });
@@ -215,20 +216,19 @@ export default class ImageRoutes extends TemplateRoutes {
      *       401:
      *         description: Unauthorized
      */
-        this._route<never, Image>(
+        this._route<RequestBody, Image>(
             "put",
             "/image/post",
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
 
-                const imageId = (req.body as RequestBody).imageId;
-                const description = (req.body as RequestBody)?.description || "";
+                const description = req.body?.description || "";
 
-                const tags: string | null = (req.body as RequestBody)?.tags || null;
+                const tags: string | null = req.body?.tags || null;
 
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = (req.body as RequestBody)?.hashtags || "";
+                const hashtags: string = req.body?.hashtags || "";
 
                 let parsedHashtags = hashtags.split(",");
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
@@ -238,14 +238,14 @@ export default class ImageRoutes extends TemplateRoutes {
                     if (!(await this._userSchema.exist(checkedTags)))
                         throw "Tagged users not found";
 
-                const image = await this._imageSchema.updatePost(
-                    imageId,
-                    req.user._id,
-                    description,
-                    checkedTags,
-                    parsedHashtags
-                );
-                res.send(image);
+                const result = await this._imageSchema.updatePost(new Image({
+                    _id: req.body.imageId,
+                    author: req.user._id,
+                    description: description,
+                    tags: checkedTags,
+                    hashtags: parsedHashtags
+                }));
+                res.send(result);
             }
         );
 
@@ -275,9 +275,23 @@ export default class ImageRoutes extends TemplateRoutes {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
 
-            await this._imageSchema.deletePost(toObjectId(req.params.id), req.user._id);
+            const image = await this._imageSchema.getUserImage(req.user._id, toObjectId(req.params.id), "key");
 
-            res.status(200);
+            if (!image._id || !image.key)
+                throw "Image not found";
+            this._awsService.s3.deleteObject({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Bucket: this._awsService.bucket,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Key: image.key
+            }, async (error) => {
+                if (error)
+                    throw error;
+
+                await this._imageSchema.deletePost(image._id as ObjectId, req.user?._id as ObjectId);
+
+                res.sendStatus(200);
+            });
         });
 
         /**
@@ -297,7 +311,7 @@ export default class ImageRoutes extends TemplateRoutes {
      *         type: number
      *         in: query
      *       - name: search
-     *         description: Search string to search a user by first name, last name, email or phone
+     *         description: Search string to search by hashtags and description
      *         type: string
      *         in: query
      *     responses:
@@ -318,19 +332,78 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
-                const search = req.query.search || "";
 
-                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || (search && typeof search !== "string"))
+                if ((!page && typeof page !== "number") || !size || page < 0 || size < 0)
                     return res.status(400).send("Invalid parameters");
                 const result = await this._imageSchema.getPaginatedImages(
                     page,
-                    size,
-                    search
+                    size
                 );
 
                 res.send(result);
             }
         );
+
+        /**
+         * @swagger
+         * /image/search:
+         *   get:
+         *     description: Get list of all images from all users by a search string
+         *     tags:
+         *       - Image
+         *     parameters:
+         *       - name: page
+         *         description: Page number. Default 0
+         *         type: number
+         *         in: query
+         *       - name: size
+         *         description: Page size. Default 10
+         *         type: number
+         *         in: query
+         *       - name: search
+         *         description: Search string to search by hashtags and description. Hashtags must start by # and words split by space.
+         *         type: string
+         *         in: query
+         *     responses:
+         *       200:
+         *         description: Search result successfully returned
+         *         schema:
+         *           type: object
+         *           properties:
+         *             hashtags:
+         *               type: array
+         *               items:
+         *                 $ref: '#/definitions/Image'
+         *             description:
+         *               type: array
+         *               items:
+         *                 $ref: '#/definitions/Image'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<never, { hashtags: Array<Image>, description: Array<Image> }>("get", "/image/search", async (req, res) => {
+            const page = Number(req.query.page) || 0;
+            const size = Number(req.query.size) || 10;
+            const search = req.query.search;
+
+            if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || typeof search !== "string")
+                throw "Invalid parameters";
+
+            const hashtags: Array<string> = [];
+            const description: Array<string> = [];
+
+            search.split(" ").forEach((word) => {
+                if (word.startsWith("#")) {
+                    if (word.length > 1)
+                        hashtags.push(word.substring(1));
+                } else
+                    description.push(word);
+            });
+
+            res.send(await this._imageSchema.getSearchPaginatedImages(page, size, hashtags, description.join(" ")));
+        });
 
         /**
      * @swagger
