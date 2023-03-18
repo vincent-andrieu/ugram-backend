@@ -1,0 +1,22 @@
+name: CD
+
+on:
+  push:
+    branches: [release-2]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+            git config --global user.name "github-actions[bot]"
+            git config --global user.name "team9"
+            git config --global credential.helper cache
+            git clone https://${{secrets.API_TOKEN_GITHUB}}@github.com/sisypheus/ugram web
+            rsync -av . web --exclude web --exclude .git --exclude .github
+            cd web
+            git pull
+            git add .
+            git commit -m "Deploy"
+            git push origin main
