@@ -1,5 +1,8 @@
 # Design
 
+Front-end déployé : https://release-2.d3sbc75qlxeszb.amplifyapp.com/
+Back-end déployé : https://ugram-team9.herokuapp.com/
+
 ## Framework frontend
 Pour le frontend nous utiliserons VueJs avec Typescript.
 
@@ -14,7 +17,7 @@ Les images seront elles stockées avec le service S3 d'AWS.
 Les GitHub Actions pour permettrons de tester la compilation de notre projet.
 
 ## Déploiement
-Nous utiliserons la méthode de déploiement proposée par le cours, soit AWS.
+Utilisation de AWS pour le front-end, et heroku pour le back-end.
 
 
 # Instructions
