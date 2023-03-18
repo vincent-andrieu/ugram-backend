@@ -3,6 +3,8 @@ name: CD
 on:
   push:
     branches: [release-2]
+  pull_request:
+    branches: [develop]
 
 jobs:
   build:
