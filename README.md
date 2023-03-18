@@ -1,6 +1,6 @@
 # Design
 
-Front-end déployé : https://release-2.d3sbc75qlxeszb.amplifyapp.com/
+Front-end déployé : https://release-2.d3sbc75qlxeszb.amplifyapp.com/     
 Back-end déployé : https://ugram-team9.herokuapp.com/
 
 ## Framework frontend
