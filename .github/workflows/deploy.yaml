@@ -7,13 +7,13 @@ on:
     branches: [develop]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: |
             git config --global user.name "github-actions[bot]"
-            git config --global user.name "team9"
+            git config --global user.email "team9"
             git config --global credential.helper cache
             git clone https://${{secrets.API_TOKEN_GITHUB}}@github.com/sisypheus/ugram web
             rsync -av . web --exclude web --exclude .git --exclude .github
