@@ -1,12 +1,12 @@
 import { Express } from "express";
 import { RequestBody } from "swagger-jsdoc";
 
-import Image from "@classes/image";
+import Image, { Reaction } from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
 import AWSService from "../init/aws";
-import { ObjectId, toObjectId } from "../utils";
+import { isObjectId, ObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
@@ -54,7 +54,7 @@ export default class ImageRoutes extends TemplateRoutes {
      * @swagger
      * /image/list/{id}:
      *   get:
-     *     description: Get image by ID
+     *     description: Get image by ID with users reactions
      *     tags:
      *       - Image
      *     parameters:
@@ -406,42 +406,42 @@ export default class ImageRoutes extends TemplateRoutes {
         });
 
         /**
-     * @swagger
-     * /image/user/{id}:
-     *   get:
-     *     description: Get list of all images from user
-     *     tags:
-     *       - Image
-     *     parameters:
-     *       - name: page
-     *         description: Page number. Default 0
-     *         type: number
-     *         in: query
-     *       - name: size
-     *         description: Page size. Default 10
-     *         type: number
-     *         in: query
-     *       - name: search
-     *         description: Search string to search a user by first name, last name, email or phone
-     *         type: string
-     *         in: query
-     *       - name: id
-     *         description: User ID
-     *         type: string
-     *         in: path
-     *     responses:
-     *       200:
-     *         description: List of users
-     *         schema:
-     *           type: array
-     *           items:
-     *             $ref: '#/definitions/Image'
-     *       400:
-     *         description: Invalid parameters
-     *       401:
-     *         description: Unauthorized
-     */
-        this._route<never, Array<Image> | string>(
+         * @swagger
+         * /image/user/{id}:
+         *   get:
+         *     description: Get list of all images from user
+         *     tags:
+         *       - Image
+         *     parameters:
+         *       - name: page
+         *         description: Page number. Default 0
+         *         type: number
+         *         in: query
+         *       - name: size
+         *         description: Page size. Default 10
+         *         type: number
+         *         in: query
+         *       - name: search
+         *         description: Search string to search a user by first name, last name, email or phone
+         *         type: string
+         *         in: query
+         *       - name: id
+         *         description: User ID
+         *         type: string
+         *         in: path
+         *     responses:
+         *       200:
+         *         description: List of users
+         *         schema:
+         *           type: array
+         *           items:
+         *             $ref: '#/definitions/Image'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<never, Array<Image>>(
             "get",
             "/image/user/:id",
             async (req, res) => {
@@ -452,7 +452,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
                 if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || target === null ||
                     (search && typeof search !== "string"))
-                    return res.status(400).send("Invalid parameters");
+                    throw "Invalid parameters";
                 const result = await this._imageSchema.getPaginatedImagesByUser(
                     target,
                     page,
@@ -462,5 +462,49 @@ export default class ImageRoutes extends TemplateRoutes {
                 res.send(result);
             }
         );
+
+
+        /**
+         * @swagger
+         * /image/{id}/reaction:
+         *   post:
+         *     description: Add user reaction to an image
+         *     tags:
+         *       - Image
+         *       - Reaction
+         *     parameters:
+         *       - name: id
+         *         description: Image ID
+         *         type: string
+         *         in: path
+         *       - name: reaction
+         *         description: Reaction name (love, joy, thumbs_up, thumbs_down, sad, sweat_smile)
+         *         type: string
+         *         in: body
+         *     responses:
+         *       200:
+         *         description: Reaction successfully added
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<{ reaction: Reaction }, never>("post", "/image/:id/reaction", async (req, res) => {
+            req.user = { _id: toObjectId("6418cb1b4fac88eddebe8c13") };
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
+            const target = toObjectId(req.params.id);
+            const reaction = req.body.reaction;
+
+            if (!isObjectId(target) || !reaction || !Image.isValidReaction(reaction))
+                throw "Invalid parameters";
+
+            if (await this._imageSchema.doesImageGotUserReaction(target, req.user._id, reaction))
+                throw "User already reacted with this reaction";
+
+            await this._imageSchema.addReaction(target, req.user._id, reaction);
+
+            res.sendStatus(200);
+        });
     }
 }
