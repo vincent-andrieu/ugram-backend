@@ -4,6 +4,7 @@ import { RequestBody } from "swagger-jsdoc";
 import Image from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
+import NotificationsSchema from "@schemas/notificationsSchema";
 import UserSchema from "@schemas/userSchema";
 import AWSService from "../init/aws";
 import { ObjectId, toObjectId } from "../utils";
@@ -13,6 +14,7 @@ export default class ImageRoutes extends TemplateRoutes {
     private _awsService = new AWSService();
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
+    private _notificationsSchema = new NotificationsSchema();
 
     constructor(app: Express, routeWhitelister: RouteWhitelister) {
         super(app);
@@ -179,6 +181,10 @@ export default class ImageRoutes extends TemplateRoutes {
                 );
 
                 res.send(image);
+
+                const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
+                const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
+                this._notificationsSchema.addUserNotification(checkedTags, "Vous avez été notifié dans une image de " + userName);
             }
         );
 
@@ -246,6 +252,10 @@ export default class ImageRoutes extends TemplateRoutes {
                     hashtags: parsedHashtags
                 }));
                 res.send(result);
+
+                const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
+                const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
+                this._notificationsSchema.addUserNotification(checkedTags, "Vous avez été notifié dans une image de " + userName);
             }
         );
 

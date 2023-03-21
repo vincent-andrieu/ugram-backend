@@ -11,6 +11,7 @@ import AuthentificationMiddleware from "@middlewares/authentification";
 import { errorLoggerMiddleware, loggerMiddleware } from "@middlewares/logger";
 import initDatabase from "./init/database";
 import initExpress from "./init/express";
+import NotificationsRoutes from "@api/notifications";
 
 dotenv.config({ path: ".env.local" });
 
@@ -33,6 +34,7 @@ async function main() {
     new AuthRoutes(app, authentificationMiddleware.whitelistRoute);
     new UserRoutes(app);
     new ImageRoutes(app, authentificationMiddleware.whitelistRoute);
+    new NotificationsRoutes(app);
 
     // Error middlewares
     app.use(errorLoggerMiddleware);
