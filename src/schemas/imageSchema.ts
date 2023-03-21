@@ -23,6 +23,10 @@ const imageSchema = new mongoose.Schema<Image>(
                 reaction: { type: String, enum: Object.values(Reaction) }
             }
         ],
+        thumbnail: {
+            url: { type: String, required: true },
+            key: { type: String, required: true, select: false }
+        },
         createdAt: { type: Date, default: Date.now }
     },
     {

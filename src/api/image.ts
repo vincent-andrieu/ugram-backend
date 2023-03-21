@@ -1,7 +1,9 @@
 import { Express } from "express";
+import { env } from "process";
+import sharp from "sharp";
 import { RequestBody } from "swagger-jsdoc";
 
-import Image, { Reaction } from "@classes/image";
+import Image, { Reaction, THUMBNAIL_CONFIG } from "@classes/image";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import UserSchema from "@schemas/userSchema";
@@ -148,35 +150,69 @@ export default class ImageRoutes extends TemplateRoutes {
         this._route<RequestBody, Image>(
             "post",
             "/image/post",
+            async (req, _, next) => {
+                const tags: string | null = req.body?.tags || null;
+                const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
+
+                if (checkedTags)
+                    if (!(await this._userSchema.exist(checkedTags)))
+                        throw "Tagged users not found";
+
+                next();
+            },
             this._awsService.multer.single("file"),
+            async (req, _, next) => {
+                if (!req.file)
+                    throw "Invalid file";
+                const response = await fetch((req.file as Express.MulterS3.File).location);
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer: Buffer = Buffer.alloc(arrayBuffer.byteLength);
+                const view = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < buffer.length; i++)
+                    buffer[i] = view[i];
+                const image = sharp(buffer).resize(THUMBNAIL_CONFIG.size.width, THUMBNAIL_CONFIG.size.height).png();
+                const key = `${Date.now().toString()}_thumbnail`;
+
+                await this._awsService.s3.putObject({
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Bucket: this._awsService.bucket,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Key: key,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Body: await image.toBuffer(),
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    ContentType: "image/png"
+                });
+                req.body.thumbnail = {
+                    url: `https://${this._awsService.bucket}.s3.${env.AWS_REGION}.amazonaws.com/${key}`,
+                    key
+                };
+
+                next();
+            },
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
                 if (!req.file)
                     throw "Invalid file";
-                const description = req.body?.description || "";
+                const description = req.body.description || "";
                 const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = req.body?.hashtags || "";
+                const hashtags: string = req.body.hashtags || "";
                 let parsedHashtags = hashtags.split(",");
 
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
                     parsedHashtags = [];
-                if (checkedTags)
-                    if (!(await this._userSchema.exist(checkedTags)))
-                        throw "Tagged users not found";
 
-                const imageSchema = new Image({
-                    author: toObjectId(req.user._id),
+                const image = await this._imageSchema.add(new Image({
+                    author: req.user._id,
                     description,
                     url: (req.file as Express.MulterS3.File).location,
                     key: (req.file as Express.MulterS3.File).key,
                     tags: checkedTags,
-                    hashtags: parsedHashtags
-                });
-                const image = await this._imageSchema.add(
-                    imageSchema
-                );
+                    hashtags: parsedHashtags,
+                    thumbnail: req.body.thumbnail
+                }));
 
                 res.send(image);
             }
