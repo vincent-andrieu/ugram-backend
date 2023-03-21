@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-import Image from "@classes/image";
+import Image, { Reaction } from "@classes/image";
+import User from "@classes/user";
 import { ObjectId } from "../utils";
 import TemplateSchema from "./templateSchema";
 
@@ -16,6 +17,12 @@ const imageSchema = new mongoose.Schema<Image>(
         key: { type: String, required: true, select: false },
         hashtags: [{ type: String }],
         tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+        reactions: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                reaction: { type: String, enum: Object.values(Reaction) }
+            }
+        ],
         createdAt: { type: Date, default: Date.now }
     },
     {
@@ -27,6 +34,25 @@ const imageSchema = new mongoose.Schema<Image>(
 export default class ImageSchema extends TemplateSchema<Image> {
     constructor() {
         super(Image, "images", imageSchema);
+    }
+
+    public async get(id: Array<ObjectId>, projection?: string): Promise<Array<Image>>;
+    public async get(id: ObjectId, projection?: string): Promise<Image>;
+    public async get(id: Array<ObjectId> | ObjectId, projection?: string): Promise<Array<Image> | Image | never> {
+        if (Array.isArray(id))
+            return super.get(id, projection);
+        else {
+            const result = await super.get(id, projection, "reactions.user");
+
+            if (result.reactions)
+                result.reactions = result.reactions.map((userReaction) => {
+                    delete (userReaction.user as User).auth;
+
+                    userReaction.user = new User(userReaction.user);
+                    return userReaction;
+                });
+            return result;
+        }
     }
 
     public async deleteUserImages(userId: ObjectId): Promise<void> {
@@ -185,5 +211,30 @@ export default class ImageSchema extends TemplateSchema<Image> {
         }, projection);
 
         return images.map((image) => new Image(image.toObject()));
+    }
+
+    public async doesImageGotUserReaction(imageId: ObjectId, userId: ObjectId, reaction: Reaction): Promise<boolean> {
+        const image = await this._model.findOne({
+            _id: imageId,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            "reactions.user": userId,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            "reactions.reaction": reaction
+        });
+
+        return !!image;
+    }
+
+    public async addReaction(imageId: ObjectId, userId: ObjectId, reaction: Reaction): Promise<void> {
+        await this._model.updateOne({
+            _id: imageId
+        }, {
+            $push: {
+                reactions: {
+                    user: userId,
+                    reaction
+                }
+            }
+        });
     }
 }
