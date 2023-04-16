@@ -521,13 +521,13 @@ export default class ImageRoutes extends TemplateRoutes {
          *       401:
          *         description: Unauthorized
          */
-        this._route<Array<{ tag: string }>, never>("get", "/tags/popular", async (req, res) => {
+        this._route<never, { tag: string }[]>("get", "/tags/popular", async (req, res) => {
             req.user = { _id: toObjectId("6418cb1b4fac88eddebe8c13") };
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
             const result = await this._imageSchema.getPopularTags();
             res.send(result);
-      
+
         });
     }
 }

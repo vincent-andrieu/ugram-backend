@@ -239,7 +239,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
     }
 
     public async getPopularTags(): Promise<Array<{ tag: string }>> {
-        return await this._model.aggregate([
+        const result = await this._model.aggregate([
             {
                 $unwind: "$hashtags"
             },
@@ -260,5 +260,6 @@ export default class ImageSchema extends TemplateSchema<Image> {
                 $limit: 10
             }
         ]);
+        return result;
     }
 }
