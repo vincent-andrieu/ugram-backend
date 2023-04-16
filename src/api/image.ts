@@ -506,5 +506,28 @@ export default class ImageRoutes extends TemplateRoutes {
 
             res.sendStatus(200);
         });
+
+        /**
+         * @swagger
+         * /image/tags/popular:
+         *   get:
+         *     description: Get list of popular tags
+         *     tags:
+         *       - Image
+         *       - Hashtags
+         *     responses:
+         *       200:
+         *         description: List of popular tags
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<Array<{ tag: string }>, never>("get", "/tags/popular", async (req, res) => {
+            req.user = { _id: toObjectId("6418cb1b4fac88eddebe8c13") };
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
+            const result = await this._imageSchema.getPopularTags();
+            res.send(result);
+      
+        });
     }
 }

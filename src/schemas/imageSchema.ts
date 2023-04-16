@@ -237,4 +237,28 @@ export default class ImageSchema extends TemplateSchema<Image> {
             }
         });
     }
+
+    public async getPopularTags(): Promise<Array<{ tag: string }>> {
+        return await this._model.aggregate([
+            {
+                $unwind: "$hashtags"
+            },
+            {
+                $group: {
+                    _id: "$hashtags",
+                    count: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $limit: 10
+            }
+        ]);
+    }
 }
