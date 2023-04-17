@@ -332,6 +332,7 @@ export default class ImageRoutes extends TemplateRoutes {
             async (req, res) => {
                 const page = Number(req.query.page) || 0;
                 const size = Number(req.query.size) || 10;
+                const popular = req.query.popular || false;
 
                 if ((!page && typeof page !== "number") || !size || page < 0 || size < 0)
                     return res.status(400).send("Invalid parameters");
@@ -521,13 +522,9 @@ export default class ImageRoutes extends TemplateRoutes {
          *       401:
          *         description: Unauthorized
          */
-        this._route<never, { tag: string }[]>("get", "/tags/popular", async (req, res) => {
-            req.user = { _id: toObjectId("6418cb1b4fac88eddebe8c13") };
-            if (!req.user?._id)
-                throw new Error("Authenticated user not found");
+        this._route<never, { tag: string }[]>("get", "/image/tags/popular", async (_, res) => {
             const result = await this._imageSchema.getPopularTags();
             res.send(result);
-
         });
     }
 }
