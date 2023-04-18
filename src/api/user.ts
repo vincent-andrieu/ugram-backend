@@ -221,11 +221,11 @@ export default class UserRoutes extends TemplateRoutes {
 
             if (images.length > 0)
                 await this._awsService.s3.deleteObjects({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     Bucket: this._awsService.bucket,
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     Delete: {
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         Objects: images.map((image) => ({ Key: image.key }))
                     }
                 });
@@ -240,6 +240,27 @@ export default class UserRoutes extends TemplateRoutes {
                     return next(error);
                 res.sendStatus(200);
             });
+        });
+
+        /**
+         * @swagger
+         * /users:
+         *   get:
+         *     description: Get a list of popular users
+         *     tags:
+         *       - User
+         *     responses:
+         *       200:
+         *         description: List of popular users
+         *         schema:
+         *           type: array
+         *           items:
+         *             $ref: '#/definitions/User'
+         */
+        this._route("get", "/user/popular", async (_, res) => {
+            const result = await this._imageSchema.getPopularUsers();
+
+            res.send(result);
         });
 
     }
