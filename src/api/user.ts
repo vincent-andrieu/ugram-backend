@@ -74,6 +74,12 @@ export default class UserRoutes extends TemplateRoutes {
             res.send(req.user);
         });
 
+        this._route("get", "/user/popular", async (_, res) => {
+            const result = await this._imageSchema.getPopularUsers();
+
+            res.send(result);
+        });
+
         this._route<never, RawUser>("get", "/user/:id", async (req, res) => {
             try {
                 const result = await this._userSchema.get(toObjectId(req.params.id));
@@ -241,27 +247,5 @@ export default class UserRoutes extends TemplateRoutes {
                 res.sendStatus(200);
             });
         });
-
-        /**
-         * @swagger
-         * /users:
-         *   get:
-         *     description: Get a list of popular users
-         *     tags:
-         *       - User
-         *     responses:
-         *       200:
-         *         description: List of popular users
-         *         schema:
-         *           type: array
-         *           items:
-         *             $ref: '#/definitions/User'
-         */
-        this._route("get", "/user/popular", async (_, res) => {
-            const result = await this._imageSchema.getPopularUsers();
-
-            res.send(result);
-        });
-
     }
 }
