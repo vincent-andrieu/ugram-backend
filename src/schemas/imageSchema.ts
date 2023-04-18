@@ -262,4 +262,46 @@ export default class ImageSchema extends TemplateSchema<Image> {
         ]);
         return result;
     }
+
+    public async getPopularUsers(): Promise<Array<{ user: User }>> {
+        const topReferencedUsers = await this._model.aggregate([
+            {
+                $unwind: "$tags"
+            },
+            {
+                $group: {
+                    _id: "$tags",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                $unwind: "$user"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    user: 1,
+                    count: 1
+                }
+            }
+        ]);
+
+        return topReferencedUsers;
+    }
 }
