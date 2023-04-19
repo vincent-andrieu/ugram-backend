@@ -2,6 +2,13 @@ import { isObjectId, NonFunctionProperties, ObjectId, toObjectId } from "../util
 import TemplateObject from "./templateObject";
 import User from "./user";
 
+export const THUMBNAIL_CONFIG = {
+    size: {
+        width: 350,
+        height: 350
+    }
+};
+
 export enum Reaction {
     LOVE = "love",
     JOY = "joy",
@@ -20,6 +27,10 @@ export default class Image extends TemplateObject {
     createdAt?: Date;
     url?: string;
     key?: string; // AWS S3 key
+    thumbnail?: {
+        url: string;
+        key?: string;
+    };
 
     constructor(image: NonFunctionProperties<Image>) {
         super(image);
@@ -39,6 +50,11 @@ export default class Image extends TemplateObject {
         this.createdAt = image.createdAt || new Date();
         this.url = image.url;
         this.key = image.key;
+        if (image.thumbnail) {
+            this.thumbnail = { url: image.thumbnail.url };
+            if (image.thumbnail.key)
+                this.thumbnail.key = image.thumbnail.key;
+        }
 
         this._validation();
     }
@@ -58,6 +74,13 @@ export default class Image extends TemplateObject {
             throw "Invalid url";
         if (this.key && typeof this.key !== "string")
             throw "Invalid key";
+        if (this.thumbnail) {
+            if ((typeof this.thumbnail.url !== "string"))
+                throw "Invalid thumbnail url";
+            if (this.thumbnail.key && typeof this.thumbnail.key !== "string")
+                throw "Invalid thumbnail key";
+        } else if (this.url && this.key)
+            throw "Thumbnail is required";
     }
 
     public static isValidReaction(reaction: Reaction | string): boolean {
