@@ -31,6 +31,7 @@ export default class Image extends TemplateObject {
         url: string;
         key?: string;
     };
+    comments?: Array<{ user: ObjectId | User, comment: string, createdAt: Date, author: string }>;
 
     constructor(image: NonFunctionProperties<Image>) {
         super(image);

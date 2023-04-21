@@ -23,6 +23,14 @@ const imageSchema = new mongoose.Schema<Image>(
                 reaction: { type: String, enum: Object.values(Reaction) }
             }
         ],
+        comments: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                author: { type: String, required: true },
+                comment: { type: String },
+                createdAt: { type: Date, default: Date.now }
+            }
+        ],
         thumbnail: {
             url: { type: String, required: true },
             key: { type: String, required: true, select: false }
@@ -307,5 +315,20 @@ export default class ImageSchema extends TemplateSchema<Image> {
         ]);
 
         return topReferencedUsers;
+    }
+
+    public async addComment(user: User, comment: string, imageId: ObjectId): Promise<void> {
+        await this._model.updateOne({
+            _id: imageId
+        }, {
+            $push: {
+                comments: {
+                    user: user._id,
+                    author: user.firstName + " " + user.lastName,
+                    comment
+                }
+            }
+        }
+        );
     }
 }
