@@ -56,6 +56,7 @@ export default class Image extends TemplateObject {
             if (image.thumbnail.key)
                 this.thumbnail.key = image.thumbnail.key;
         }
+        this.comments = image.comments;
 
         this._validation();
     }
