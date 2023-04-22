@@ -536,7 +536,6 @@ export default class ImageRoutes extends TemplateRoutes {
          *         description: Unauthorized
          */
         this._route<{ reaction: Reaction }, never>("post", "/image/:id/reaction", async (req, res) => {
-            req.user = { _id: toObjectId("6418cb1b4fac88eddebe8c13") };
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
             const target = toObjectId(req.params.id);
