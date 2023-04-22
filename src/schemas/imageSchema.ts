@@ -228,10 +228,12 @@ export default class ImageSchema extends TemplateSchema<Image> {
     public async doesImageGotUserReaction(imageId: ObjectId, userId: ObjectId, reaction: Reaction): Promise<boolean> {
         const image = await this._model.findOne({
             _id: imageId,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            "reactions.user": userId,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            "reactions.reaction": reaction
+            reactions: {
+                $elemMatch: {
+                    user: userId,
+                    reaction: reaction
+                }
+            }
         });
 
         return !!image;
