@@ -595,7 +595,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
             const fullUser = await this._userSchema.get(toObjectId(user));
 
-            await this._imageSchema.addComment(fullUser, comment, toObjectId(user));
+            await this._imageSchema.addComment(fullUser, comment, toObjectId(id));
             res.sendStatus(200);
         });
     }
