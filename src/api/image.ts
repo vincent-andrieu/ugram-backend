@@ -220,7 +220,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
                 const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
                 const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
-                this._notificationsSchema.addUserNotification(checkedTags, "Vous avez été notifié dans une image de " + userName);
+                this._notificationsSchema.addUserNotification(checkedTags, "You were tagged in " + userName + "'s post");
             }
         );
 
@@ -291,7 +291,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
                 const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
                 const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
-                this._notificationsSchema.addUserNotification(checkedTags, "Vous avez été notifié dans une image de " + userName);
+                this._notificationsSchema.addUserNotification(checkedTags, "You were tagged in " + userName + "'s post");
             }
         );
 
