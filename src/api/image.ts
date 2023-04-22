@@ -551,11 +551,15 @@ export default class ImageRoutes extends TemplateRoutes {
 
             res.sendStatus(200);
 
-            const image = await this._imageSchema.get(target, "author");
-            if (image.author)
-                this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " reacted to your image");
-            else
-                console.warn("Image author not found");
+            try {
+                const image = await this._imageSchema.get(target, "author");
+                if (image.author)
+                    this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " reacted to your image");
+                else
+                    throw "Image author not found";
+            } catch (error) {
+                console.warn(error);
+            }
         });
 
         /**

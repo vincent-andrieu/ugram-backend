@@ -54,7 +54,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
         if (Array.isArray(id))
             return super.get(id, projection);
         else {
-            const result = await super.get(id, projection, "reactions.user");
+            const result = await super.get(id, projection, !projection || projection?.includes("reactions.user") ? "reactions.user" : undefined);
 
             if (result.reactions)
                 result.reactions = result.reactions.map((userReaction) => {
