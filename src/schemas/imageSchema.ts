@@ -27,7 +27,7 @@ const imageSchema = new mongoose.Schema<Image>(
             {
                 user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
                 author: { type: String, required: true },
-                comment: { type: String },
+                comment: { type: String, required: true },
                 createdAt: { type: Date, default: Date.now }
             }
         ],
@@ -325,7 +325,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
                 comments: {
                     user: user._id,
                     author: user.firstName + " " + user.lastName,
-                    comment
+                    comment: comment
                 }
             }
         }
