@@ -588,14 +588,14 @@ export default class ImageRoutes extends TemplateRoutes {
          *     tags:
          *       - Image
          *     parameters:
-         *      - name: user
-         *      description: User ID
-         *      type: string
-         *    in: body
-         *      - name: comment
-         *      description: Comment
-         *      type: string
-         *      in: body
+         *       - name: user
+         *         description: User ID
+         *         type: string
+         *         in: body
+         *       - name: comment
+         *         description: Comment
+         *         type: string
+         *         in: body
          *     responses:
          *       200:
          *       400:
