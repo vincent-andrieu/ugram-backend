@@ -553,10 +553,9 @@ export default class ImageRoutes extends TemplateRoutes {
 
             try {
                 const image = await this._imageSchema.get(target, "author");
-                if (image.author)
+
+                if (image.author && !(image.author._id || image.author as ObjectId).equals(req.user._id))
                     this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " reacted to your image");
-                else
-                    throw "Image author not found";
             } catch (error) {
                 console.warn(error);
             }
@@ -603,6 +602,8 @@ export default class ImageRoutes extends TemplateRoutes {
          *         description: Invalid parameters
          */
         this._route<{ user: string, comment: string }, never>("post", "/image/:id/comment", async (req, res) => {
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
             const id = req.params.id;
             if (!isObjectId(id))
                 throw "Invalid parameters";
@@ -615,6 +616,13 @@ export default class ImageRoutes extends TemplateRoutes {
 
             await this._imageSchema.addComment(fullUser, comment, toObjectId(id));
             res.sendStatus(200);
+
+            try {
+                if (fullUser._id && !fullUser._id.equals(req.user._id))
+                    this._notificationsSchema.addUserNotification(fullUser._id, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " commented on your image");
+            } catch (error) {
+                console.warn(error);
+            }
         });
     }
 }
