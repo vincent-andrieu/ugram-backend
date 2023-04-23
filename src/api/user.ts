@@ -74,6 +74,12 @@ export default class UserRoutes extends TemplateRoutes {
             res.send(req.user);
         });
 
+        this._route("get", "/user/popular", async (_, res) => {
+            const result = await this._imageSchema.getPopularUsers();
+
+            res.send(result);
+        });
+
         this._route<never, RawUser>("get", "/user/:id", async (req, res) => {
             try {
                 const result = await this._userSchema.get(toObjectId(req.params.id));
@@ -221,11 +227,11 @@ export default class UserRoutes extends TemplateRoutes {
 
             if (images.length > 0)
                 await this._awsService.s3.deleteObjects({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     Bucket: this._awsService.bucket,
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     Delete: {
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         Objects: images.map((image) => ({ Key: image.key }))
                     }
                 });
@@ -241,6 +247,5 @@ export default class UserRoutes extends TemplateRoutes {
                 res.sendStatus(200);
             });
         });
-
     }
 }

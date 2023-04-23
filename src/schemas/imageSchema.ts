@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-import Image from "@classes/image";
+import Image, { Reaction } from "@classes/image";
+import User from "@classes/user";
 import { ObjectId } from "../utils";
 import TemplateSchema from "./templateSchema";
 
@@ -16,6 +17,24 @@ const imageSchema = new mongoose.Schema<Image>(
         key: { type: String, required: true, select: false },
         hashtags: [{ type: String }],
         tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+        reactions: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                reaction: { type: String, enum: Object.values(Reaction) }
+            }
+        ],
+        comments: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+                author: { type: String, required: true },
+                comment: { type: String, required: true },
+                createdAt: { type: Date, default: Date.now }
+            }
+        ],
+        thumbnail: {
+            url: { type: String, required: true },
+            key: { type: String, required: true, select: false }
+        },
         createdAt: { type: Date, default: Date.now }
     },
     {
@@ -27,6 +46,25 @@ const imageSchema = new mongoose.Schema<Image>(
 export default class ImageSchema extends TemplateSchema<Image> {
     constructor() {
         super(Image, "images", imageSchema);
+    }
+
+    public async get(id: Array<ObjectId>, projection?: string): Promise<Array<Image>>;
+    public async get(id: ObjectId, projection?: string): Promise<Image>;
+    public async get(id: Array<ObjectId> | ObjectId, projection?: string): Promise<Array<Image> | Image | never> {
+        if (Array.isArray(id))
+            return super.get(id, projection);
+        else {
+            const result = await super.get(id, projection, !projection || projection?.includes("reactions.user") ? "reactions.user" : undefined);
+
+            if (result.reactions)
+                result.reactions = result.reactions.map((userReaction) => {
+                    delete (userReaction.user as User).auth;
+
+                    userReaction.user = new User(userReaction.user);
+                    return userReaction;
+                });
+            return result;
+        }
     }
 
     public async deleteUserImages(userId: ObjectId): Promise<void> {
@@ -185,5 +223,114 @@ export default class ImageSchema extends TemplateSchema<Image> {
         }, projection);
 
         return images.map((image) => new Image(image.toObject()));
+    }
+
+    public async doesImageGotUserReaction(imageId: ObjectId, userId: ObjectId, reaction: Reaction): Promise<boolean> {
+        const image = await this._model.findOne({
+            _id: imageId,
+            reactions: {
+                $elemMatch: {
+                    user: userId,
+                    reaction: reaction
+                }
+            }
+        });
+
+        return !!image;
+    }
+
+    public async addReaction(imageId: ObjectId, userId: ObjectId, reaction: Reaction): Promise<void> {
+        await this._model.updateOne({
+            _id: imageId
+        }, {
+            $push: {
+                reactions: {
+                    user: userId,
+                    reaction
+                }
+            }
+        });
+    }
+
+    public async getPopularTags(): Promise<Array<{ tag: string }>> {
+        const result = await this._model.aggregate([
+            {
+                $unwind: "$hashtags"
+            },
+            {
+                $group: {
+                    _id: "$hashtags",
+                    count: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $limit: 10
+            }
+        ]);
+        return result;
+    }
+
+    public async getPopularUsers(): Promise<Array<{ user: User }>> {
+        const topReferencedUsers = await this._model.aggregate([
+            {
+                $unwind: "$tags"
+            },
+            {
+                $group: {
+                    _id: "$tags",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                $unwind: "$user"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    user: 1,
+                    count: 1
+                }
+            }
+        ]);
+
+        return topReferencedUsers;
+    }
+
+    public async addComment(user: User, comment: string, imageId: ObjectId): Promise<void> {
+        await this._model.updateOne({
+            _id: imageId
+        }, {
+            $push: {
+                comments: {
+                    user: user._id,
+                    author: user.useName || user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName,
+                    comment: comment
+                }
+            }
+        }
+        );
     }
 }

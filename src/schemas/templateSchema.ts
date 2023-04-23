@@ -14,18 +14,24 @@ export default abstract class TemplateSchema<T extends TemplateObject> {
         return new this._ctor((await this._model.create(obj)).toObject());
     }
 
-    public async get(id: Array<ObjectId>, projection?: string): Promise<Array<T>>;
-    public async get(id: ObjectId, projection?: string): Promise<T>;
-    public async get(id: Array<ObjectId> | ObjectId, projection?: string): Promise<Array<T> | T | never> {
+    public async get(id: Array<ObjectId>, projection?: string, populate?: string): Promise<Array<T>>;
+    public async get(id: ObjectId, projection?: string, populate?: string): Promise<T>;
+    public async get(id: Array<ObjectId> | ObjectId, projection?: string, populate?: string): Promise<Array<T> | T | never> {
         if (Array.isArray(id)) {
-            const result = await this._model.find({ _id: { $in: id } }, projection);
+            const query = this._model.find({ _id: { $in: id } }, projection);
 
+            if (populate)
+                query.populate(populate);
+            const result = await query;
             if (result.length !== id.length)
                 throw new Error("TemplateSchema.get(Array) Not found");
             return result.map(obj => new this._ctor(obj.toObject()));
         }  else {
-            const result = await this._model.findById(id, projection);
+            const query = this._model.findById(id, projection);
 
+            if (populate)
+                query.populate(populate);
+            const result = await query;
             if (!result)
                 throw new Error("TemplateSchema.get(ObjectId) Not found");
             return new this._ctor(result.toObject());

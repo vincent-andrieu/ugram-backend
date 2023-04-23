@@ -1,18 +1,23 @@
 import { Express } from "express";
+import { env } from "process";
+import sharp from "sharp";
 import { RequestBody } from "swagger-jsdoc";
 
-import Image from "@classes/image";
+import Image, { Reaction, THUMBNAIL_CONFIG } from "@classes/image";
+import User from "@classes/user";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
+import NotificationsSchema from "@schemas/notificationsSchema";
 import UserSchema from "@schemas/userSchema";
 import AWSService from "../init/aws";
-import { ObjectId, toObjectId } from "../utils";
+import { ObjectId, isObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
     private _awsService = new AWSService();
     private _userSchema = new UserSchema();
     private _imageSchema = new ImageSchema();
+    private _notificationsSchema = new NotificationsSchema();
 
     constructor(app: Express, routeWhitelister: RouteWhitelister) {
         super(app);
@@ -54,7 +59,7 @@ export default class ImageRoutes extends TemplateRoutes {
      * @swagger
      * /image/list/{id}:
      *   get:
-     *     description: Get image by ID
+     *     description: Get image by ID with users reactions
      *     tags:
      *       - Image
      *     parameters:
@@ -148,37 +153,75 @@ export default class ImageRoutes extends TemplateRoutes {
         this._route<RequestBody, Image>(
             "post",
             "/image/post",
+            async (req, _, next) => {
+                const tags: string | null = req.body?.tags || null;
+                const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
+
+                if (checkedTags)
+                    if (!(await this._userSchema.exist(checkedTags)))
+                        throw "Tagged users not found";
+
+                next();
+            },
             this._awsService.multer.single("file"),
+            async (req, _, next) => {
+                if (!req.file)
+                    throw "Invalid file";
+                const response = await fetch((req.file as Express.MulterS3.File).location);
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer: Buffer = Buffer.alloc(arrayBuffer.byteLength);
+                const view = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < buffer.length; i++)
+                    buffer[i] = view[i];
+                const image = sharp(buffer).resize(THUMBNAIL_CONFIG.size.width, THUMBNAIL_CONFIG.size.height).png();
+                const key = `${Date.now().toString()}_thumbnail`;
+
+                await this._awsService.s3.putObject({
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Bucket: this._awsService.bucket,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Key: key,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Body: await image.toBuffer(),
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    ContentType: "image/png"
+                });
+                req.body.thumbnail = {
+                    url: `https://${this._awsService.bucket}.s3.${env.AWS_REGION}.amazonaws.com/${key}`,
+                    key
+                };
+
+                next();
+            },
             async (req, res) => {
                 if (!req.user?._id)
                     throw new Error("Authenticated user not found");
                 if (!req.file)
                     throw "Invalid file";
-                const description = req.body?.description || "";
+                const description = req.body.description || "";
                 const tags: string | null = req.body?.tags || null;
                 const checkedTags: Array<ObjectId> = tags?.split(",")?.map((tag) => toObjectId(tag)) || [];
-                const hashtags: string = req.body?.hashtags || "";
+                const hashtags: string = req.body.hashtags || "";
                 let parsedHashtags = hashtags.split(",");
 
                 if (parsedHashtags.length === 1 && parsedHashtags[0] === "")
                     parsedHashtags = [];
-                if (checkedTags)
-                    if (!(await this._userSchema.exist(checkedTags)))
-                        throw "Tagged users not found";
 
-                const imageSchema = new Image({
-                    author: toObjectId(req.user._id),
+                const image = await this._imageSchema.add(new Image({
+                    author: req.user._id,
                     description,
                     url: (req.file as Express.MulterS3.File).location,
                     key: (req.file as Express.MulterS3.File).key,
                     tags: checkedTags,
-                    hashtags: parsedHashtags
-                });
-                const image = await this._imageSchema.add(
-                    imageSchema
-                );
+                    hashtags: parsedHashtags,
+                    thumbnail: req.body.thumbnail
+                }));
 
                 res.send(image);
+
+                const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
+                const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
+                this._notificationsSchema.addUserNotification(checkedTags, "You were tagged in " + userName + "'s post");
             }
         );
 
@@ -246,6 +289,10 @@ export default class ImageRoutes extends TemplateRoutes {
                     hashtags: parsedHashtags
                 }));
                 res.send(result);
+
+                const user = await this._userSchema.get(req.user._id, "useName firstName lastName");
+                const userName = user.useName || (user?.lastName ? user?.firstName + " " + user?.lastName : user?.firstName);
+                this._notificationsSchema.addUserNotification(checkedTags, "You were tagged in " + userName + "'s post");
             }
         );
 
@@ -406,42 +453,42 @@ export default class ImageRoutes extends TemplateRoutes {
         });
 
         /**
-     * @swagger
-     * /image/user/{id}:
-     *   get:
-     *     description: Get list of all images from user
-     *     tags:
-     *       - Image
-     *     parameters:
-     *       - name: page
-     *         description: Page number. Default 0
-     *         type: number
-     *         in: query
-     *       - name: size
-     *         description: Page size. Default 10
-     *         type: number
-     *         in: query
-     *       - name: search
-     *         description: Search string to search a user by first name, last name, email or phone
-     *         type: string
-     *         in: query
-     *       - name: id
-     *         description: User ID
-     *         type: string
-     *         in: path
-     *     responses:
-     *       200:
-     *         description: List of users
-     *         schema:
-     *           type: array
-     *           items:
-     *             $ref: '#/definitions/Image'
-     *       400:
-     *         description: Invalid parameters
-     *       401:
-     *         description: Unauthorized
-     */
-        this._route<never, Array<Image> | string>(
+         * @swagger
+         * /image/user/{id}:
+         *   get:
+         *     description: Get list of all images from user
+         *     tags:
+         *       - Image
+         *     parameters:
+         *       - name: page
+         *         description: Page number. Default 0
+         *         type: number
+         *         in: query
+         *       - name: size
+         *         description: Page size. Default 10
+         *         type: number
+         *         in: query
+         *       - name: search
+         *         description: Search string to search a user by first name, last name, email or phone
+         *         type: string
+         *         in: query
+         *       - name: id
+         *         description: User ID
+         *         type: string
+         *         in: path
+         *     responses:
+         *       200:
+         *         description: List of users
+         *         schema:
+         *           type: array
+         *           items:
+         *             $ref: '#/definitions/Image'
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<never, Array<Image>>(
             "get",
             "/image/user/:id",
             async (req, res) => {
@@ -452,7 +499,7 @@ export default class ImageRoutes extends TemplateRoutes {
 
                 if ((!page && typeof page !== "number") || !size || page < 0 || size < 0 || target === null ||
                     (search && typeof search !== "string"))
-                    return res.status(400).send("Invalid parameters");
+                    throw "Invalid parameters";
                 const result = await this._imageSchema.getPaginatedImagesByUser(
                     target,
                     page,
@@ -462,5 +509,121 @@ export default class ImageRoutes extends TemplateRoutes {
                 res.send(result);
             }
         );
+
+
+        /**
+         * @swagger
+         * /image/{id}/reaction:
+         *   post:
+         *     description: Add user reaction to an image
+         *     tags:
+         *       - Image
+         *       - Reaction
+         *     parameters:
+         *       - name: id
+         *         description: Image ID
+         *         type: string
+         *         in: path
+         *       - name: reaction
+         *         description: Reaction name (love, joy, thumbs_up, thumbs_down, sad, sweat_smile)
+         *         type: string
+         *         in: body
+         *     responses:
+         *       200:
+         *         description: Reaction successfully added
+         *       400:
+         *         description: Invalid parameters
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<{ reaction: Reaction }, never>("post", "/image/:id/reaction", async (req, res) => {
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
+            const target = toObjectId(req.params.id);
+            const reaction = req.body.reaction;
+
+            if (!isObjectId(target) || !reaction || !Image.isValidReaction(reaction))
+                throw "Invalid parameters";
+
+            if (await this._imageSchema.doesImageGotUserReaction(target, req.user._id, reaction))
+                throw "User already reacted with this reaction";
+
+            await this._imageSchema.addReaction(target, req.user._id, reaction);
+
+            res.sendStatus(200);
+
+            try {
+                const image = await this._imageSchema.get(target, "author");
+
+                if (image.author && (image.author._id || image.author as ObjectId).toString() !== req.user._id.toString())
+                    this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " reacted to your image");
+            } catch (error) {
+                console.warn(error);
+            }
+        });
+
+        /**
+         * @swagger
+         * /image/tags/popular:
+         *   get:
+         *     description: Get list of popular tags
+         *     tags:
+         *       - Image
+         *       - Hashtags
+         *     responses:
+         *       200:
+         *         description: List of popular tags
+         *       401:
+         *         description: Unauthorized
+         */
+        this._route<never, { tag: string }[]>("get", "/image/tags/popular", async (_, res) => {
+            const result = await this._imageSchema.getPopularTags();
+            res.send(result);
+        });
+
+        /**
+         * @swagger
+         * /image/:id/comment:
+         *   post:
+         *     description: Add comment to an image
+         *     tags:
+         *       - Image
+         *     parameters:
+         *       - name: user
+         *         description: User ID
+         *         type: string
+         *         in: body
+         *       - name: comment
+         *         description: Comment
+         *         type: string
+         *         in: body
+         *     responses:
+         *       200:
+         *       400:
+         *         description: Invalid parameters
+         */
+        this._route<{ comment: string }, never>("post", "/image/:id/comment", async (req, res) => {
+            if (!req.user?._id)
+                throw new Error("Authenticated user not found");
+            const id = toObjectId(req.params.id);
+            if (!isObjectId(id))
+                throw "Invalid parameters";
+
+            const { comment } = req.body;
+            if (!comment)
+                throw "Invalid parameters";
+
+            await this._imageSchema.addComment(new User(req.user), comment, id);
+            res.sendStatus(200);
+
+            try {
+                const image = await this._imageSchema.get(id, "author");
+
+                if (image.author && (image.author._id || image.author as ObjectId).toString() !== req.user._id.toString())
+                    this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " commented on your image");
+            } catch (error) {
+                console.warn(error);
+            }
+        });
     }
 }
