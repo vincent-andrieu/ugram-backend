@@ -588,6 +588,15 @@ export default class ImageRoutes extends TemplateRoutes {
          *     description: Add comment to an image
          *     tags:
          *       - Image
+         *     parameters:
+         *      - name: user
+         *      description: User ID
+         *      type: string
+         *    in: body
+         *      - name: comment
+         *      description: Comment
+         *      type: string
+         *      in: body
          *     responses:
          *       200:
          *       400:
