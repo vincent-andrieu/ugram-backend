@@ -25,35 +25,19 @@ Ce repository contient seulement la partie backend du projet. C'est pourquoi il 
 
 ## Implémentations
 - L'application est lancée en mode production avec le docker compose.
-- L'**authentification** avec [passportjs](https://www.passportjs.org/) a été implémenté pour le premier livrable. Celle-ci fonctionne avec un email et un mot de passe ou par l'oauth2 via **Google**, **GitHub** ou **Discord**.
+- L'**authentification** avec [passportjs](https://www.passportjs.org/) a été implémenté. Celle-ci fonctionne avec un email et un mot de passe ou par l'oauth2 via **Google**, **GitHub** ou **Discord**.
     - Les mots de passes stockés dans la base de données sont hachés avec [bcryptjs](https://www.npmjs.com/package/bcryptjs).
     - Le cookie utilisé pour l'authentification est celui de *passportjs* et il est vérifié par un middleware sur les routes protégées.
-- **Swagger** a été implémenter sur la route `/docs` pour faciliter la documentation de l'API et ainsi plus facilement voir les paramètres des routes. Attention, la route n'est pas accessible en production (donc pas avec le docker).
+- **Swagger** a été implémenter sur la route `/docs` (du backend) pour faciliter la documentation de l'API et ainsi plus facilement voir les paramètres des routes. Attention, la route n'est pas accessible en production (donc pas avec le docker).
 - **ESLint** a été installé pour le formatage du code. Des règles assez strictes ont été ajoutées, notamment pour respecter la case.
-- 2 **GitHub Actions** ont été ajoutés pour tester la compilation et le formattage du code. Ces workflows sont lancés à chaque push sur les branches `main` et `develop` ou lors d'une Pull Request.
+- 3 **GitHub Actions** ont été ajoutés pour tester la compilation, le formattage du code et le déploiement.
 - Des **abstractions** ont été faites sur les **routes** (notamment pour catch plus facilement les erreurs), les **schémas** Mongoose utilisés pour intéragir avec la base de données et pour les différents **objets** comme les utilisateurs et les images.
 - **2 middlewares** ont été ajoutés pour les avoir des **logs** des requêtes entrantes et des erreurs.
-- La recherche d'utilisateurs via la search bar se fait avec une pagination et utilise les champs suivants en ignorant la casse :
-    - Nom d'usage
-    - Prénom
-    - Nom
-    - Mail
-    - Numéro de téléphone
-- Une base de 3 utilisateurs sont ajoutés à l'initialisation de la base de données pour faciliter l'utilisation de l'application. Ils sont disponibles dans le fichier [`users_dataset.json`](./users_dataset.json) :
-    - `user1` :
-        - Mail : `john.doe@example.com`
-        - Mot de passe : `password1`
-    - `user2` :
-        - Mail : `jane.doe@example.com`
-        - Mot de passe : `password2`
-    - `user3` :
-        - Mail : `jack.smith@example.com`
-        - Mot de passe : `password3`
 
 ## Prérequis
 ### Versions
 - **Docker** version 20.10.23
-- **Docker Compose** version v2.16.0
+- **Docker Compose** version v2.17.2
 
 ### Environnement
 Pour lancer avec le docker il est important d'avoir le fichier `.env.production` créé à la racine du projet avec toutes les variables d'environnement. Sans celui-ci le backend ne pourra fonctionner correctement.  
