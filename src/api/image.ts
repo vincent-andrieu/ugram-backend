@@ -4,12 +4,13 @@ import sharp from "sharp";
 import { RequestBody } from "swagger-jsdoc";
 
 import Image, { Reaction, THUMBNAIL_CONFIG } from "@classes/image";
+import User from "@classes/user";
 import { RouteWhitelister } from "@middlewares/authentification";
 import ImageSchema from "@schemas/imageSchema";
 import NotificationsSchema from "@schemas/notificationsSchema";
 import UserSchema from "@schemas/userSchema";
 import AWSService from "../init/aws";
-import { isObjectId, ObjectId, toObjectId } from "../utils";
+import { ObjectId, isObjectId, toObjectId } from "../utils";
 import TemplateRoutes from "./templateRoutes";
 
 export default class ImageRoutes extends TemplateRoutes {
@@ -554,7 +555,7 @@ export default class ImageRoutes extends TemplateRoutes {
             try {
                 const image = await this._imageSchema.get(target, "author");
 
-                if (image.author && !(image.author._id || image.author as ObjectId).equals(req.user._id))
+                if (image.author && (image.author._id || image.author as ObjectId).toString() !== req.user._id.toString())
                     this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " reacted to your image");
             } catch (error) {
                 console.warn(error);
@@ -601,25 +602,25 @@ export default class ImageRoutes extends TemplateRoutes {
          *       400:
          *         description: Invalid parameters
          */
-        this._route<{ user: string, comment: string }, never>("post", "/image/:id/comment", async (req, res) => {
+        this._route<{ comment: string }, never>("post", "/image/:id/comment", async (req, res) => {
             if (!req.user?._id)
                 throw new Error("Authenticated user not found");
-            const id = req.params.id;
+            const id = toObjectId(req.params.id);
             if (!isObjectId(id))
                 throw "Invalid parameters";
 
-            const { user, comment } = req.body;
-            if (!comment || !user)
+            const { comment } = req.body;
+            if (!comment)
                 throw "Invalid parameters";
 
-            const fullUser = await this._userSchema.get(toObjectId(user));
-
-            await this._imageSchema.addComment(fullUser, comment, toObjectId(id));
+            await this._imageSchema.addComment(new User(req.user), comment, id);
             res.sendStatus(200);
 
             try {
-                if (fullUser._id && !fullUser._id.equals(req.user._id))
-                    this._notificationsSchema.addUserNotification(fullUser._id, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " commented on your image");
+                const image = await this._imageSchema.get(id, "author");
+
+                if (image.author && (image.author._id || image.author as ObjectId).toString() !== req.user._id.toString())
+                    this._notificationsSchema.addUserNotification(image.author._id || image.author as ObjectId, (req.user.useName || (req.user.lastName && req.user.firstName) ? `${req.user.firstName} ${req.user.lastName}` : req.user.firstName) + " commented on your image");
             } catch (error) {
                 console.warn(error);
             }
