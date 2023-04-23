@@ -326,7 +326,7 @@ export default class ImageSchema extends TemplateSchema<Image> {
             $push: {
                 comments: {
                     user: user._id,
-                    author: user.firstName + " " + user.lastName,
+                    author: user.useName || user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName,
                     comment: comment
                 }
             }
